@@ -275,23 +275,35 @@
   <script type="text/javascript">
   (function() {
     var ds = (function() {
-      var that = {};
+      var that = {},
+          items = [
+            { customer: 'Auck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { customer: 'Buck Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
+            { customer: 'Cuck Phillips', company: 'Gteal Your Change Subs', city: 'Hazlet', state: 'NJ' },
+            { customer: 'Duck Phillips', company: 'Fteal Your Change Subs', city: 'Itasca', state: 'IL' },
+            { customer: 'Euck Phillips', company: 'Eteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { customer: 'Zuck Phillips', company: 'Dteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { customer: 'Guck Phillips', company: 'Cteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { customer: 'Huck Phillips', company: 'Bteal Your Change Subs', city: 'Red Bank', state: 'CA' },
+            { customer: 'Iuck Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
+          ];
 
       that.getData = function(sortOptions, callback) {
+        var directionFactor;
+
         if(!callback) {
           callback = sortOptions;
+          sortOptions = null;
         }
-        callback([
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' }
-        ]);
+        if(sortOptions) {
+          directionFactor = sortOptions.direction === 'asc' ? 1 : -1;
+          items.sort(function(a, b) {
+            if(a[sortOptions.field] > b[sortOptions.field]) return 1 * directionFactor;
+            if(a[sortOptions.field] < b[sortOptions.field]) return -1 * directionFactor;
+            return 0;
+          });
+        }
+        callback(items);
       };
       
       return that;
