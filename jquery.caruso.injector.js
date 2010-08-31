@@ -75,4 +75,7 @@
 
     return this;
   };
+
+  $.pascalize = pascalize;
+  $.camelize = camelize;
 })(jQuery);
