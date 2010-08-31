@@ -109,7 +109,31 @@
           .caruso-grid .caruso-grid-body .subgrid {
             border-right: none;
           }
+    
+    .caruso-grid .caruso-detail-cell {
+      border: none;
+      border-top: solid 1px black;
+      padding: 0;
+    }
+      .caruso-grid .caruso-detail-cell table {
+        margin-left: 20px;
+        width: 765px;
       }
+      .caruso-grid .caruso-detail-cell table td {
+        border: none;
+      }
+
+    .order {
+      width: 540px;
+    }
+    .quantity {
+      width: 190px;
+      text-align: right;
+    }
+    .caruso-grid .caruso-detail-cell .state {
+      width: 25px;
+    }
+#wtf { width: 765px; }
   </style>
 </head>
 <body>
@@ -230,6 +254,39 @@
           <td class="state">NJ</td>
         </tr>
         <tr>
+          <td colspan="5" class="caruso-detail-cell">
+            <table id="wtf"style="width:765px;" class="caruso-detail-table">
+              <tbody>
+              <tr>
+                <td class="order">Hot Dogs</td>
+                <td class="quantity">15</td>
+                <td class="state">IL</td>
+              </tr>
+              <tr>
+                <td class="order">Hot Dogs</td>
+                <td class="quantity">15</td>
+                <td class="state">IL</td>
+              </tr>
+              <tr>
+                <td class="order">Hot Dogs</td>
+                <td class="quantity">15</td>
+                <td class="state">IL</td>
+              </tr>
+              <tr>
+                <td class="order">Hot Dogs</td>
+                <td class="quantity">15</td>
+                <td class="state">IL</td>
+              </tr>
+              <tr>
+                <td class="order">Hot Dogs</td>
+                <td class="quantity">15</td>
+                <td class="state">IL</td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
           <td class="expand"></td>
           <td class="customer">Buck Phillips</td>
           <td class="company">Steal Your Change Subs</td>
@@ -309,7 +366,12 @@
       return that;
     })();
     $('#customers').carusoGrid({
-      getData: ds.getData,
+      dataSource: ds,
+      detail: {
+        getData: function(a) {
+          console.log(a);
+        }
+      }
     });
     $('.expand').click(function(evt) {
       var row = $(evt.originalTarget).closest('tr');
