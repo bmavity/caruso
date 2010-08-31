@@ -69,14 +69,15 @@
     };
   };
 
-  $.fn.carusoGrid = function carusoGrid(dataSource) {
+  $.fn.carusoGrid = function carusoGrid(config) {
     var model = createModel(this),
         dimensions = {
           height: this.height(),
           width: this.width()
         },
         grid = createGrid({
-          dataSource: dataSource,
+          dataSource: config.dataSource,
+          detail: config.detail,
           dimensions: dimensions,
           model: model,
           $placeholder: this
