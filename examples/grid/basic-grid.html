@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Caruso Grid - Basic Example</title>
+
+  <style type="text/css">
+    .customer {
+      text-align: left;
+      width: 189px;
+    }
+    .city {
+      text-align: left;
+      width: 189px;
+    }
+    .company {
+      text-align: left;
+      width: 339px;
+    }
+    .state {
+      text-align: left;
+      width: 40px;
+    }
+
+    #composed-table .caruso-grid-body table {
+      width: 785px;
+    }
+    #composed-table .customer {
+      text-align: left;
+      width: 169px;
+    }
+    #composed-table .city {
+      text-align: left;
+      width: 189px;
+    }
+    #composed-table .company {
+      text-align: left;
+      width: 339px;
+    }
+    #composed-table .state {
+      text-align: left;
+      width: 25px;
+    }
+
+    /*
+    #customers {
+      border: solid 1px black;
+      height: 160px;
+      overflow: hidden;
+    }
+    th {
+      border: solid 1px black;
+      text-align: left;
+      padding: 5px;
+    }
+    td {
+      background-color: #CCC;
+      border: solid 1px black;
+      text-align: left;
+      padding: 3px 5px;
+    }
+    */
+    .caruso-grid {
+      border: solid 1px black;
+      height: 160px;
+      margin-top: 25px;
+      overflow: hidden;
+      width: 800px;
+    }
+      .caruso-grid table {
+        border: none;
+        border-collapse: collapse;
+        border-spacing: collapse;
+      }
+        .caruso-grid table th {
+          border-right: solid 1px black;
+          padding: 5px;
+        }
+        .caruso-grid table td {
+          border-top: solid 1px black;
+          border-right: solid 1px black;
+          background-color: #CCC;
+          padding: 3px 5px;
+        }
+        .caruso-grid table .state {
+          border-right: none;
+        }
+      .caruso-grid .caruso-grid-body {
+        border-top: solid 1px black;
+        height: 132px;
+        overflow: auto;
+      }
+        .caruso-grid .expand {
+          border-right: none;
+          padding: 0;
+          width: 20px;
+        }
+        .caruso-grid .caruso-grid-body table {
+        }
+          .caruso-grid .caruso-grid-body tr:first-child td {
+            border-top: none;
+          }
+          .caruso-grid .caruso-grid-body tr:hover td {
+            cursor: pointer;
+            background-color: #999;
+          }
+          .caruso-grid .caruso-grid-body tr.expanded td {
+            border-top: none;
+          }
+          .caruso-grid .caruso-grid-body .subgrid {
+            border-right: none;
+          }
+      }
+  </style>
+</head>
+<body>
+  <h1>Caruso Grid Dynamic Data Loading</h1>
+  <div id="customers" class="caruso-grid caruso-grid-head caruso-grid-body">
+    <table>
+      <thead>
+      <tr>
+        <th class="customer">Customer</th>
+        <th class="company">Company</th>
+        <th class="city">City</th>
+        <th class="state">State</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+<tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+<tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+
+      </tbody>
+    </table>
+  </div>
+  <div id="composed-table" class="caruso-grid">
+    <div class="caruso-grid-head">
+      <table>
+        <thead>
+        <tr>
+          <th class="expand"></th>
+          <th class="customer">Customer</th>
+          <th class="company">Company</th>
+          <th class="city">City</th>
+          <th class="state">State</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="caruso-grid-body">
+      <table>
+        <tbody>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        <tr>
+          <td class="expand"></td>
+          <td class="customer">Buck Phillips</td>
+          <td class="company">Steal Your Change Subs</td>
+          <td class="city">Red Bank</td>
+          <td class="state">NJ</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script type="text/javascript" src="../../jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="../../jquery.getscrollbarwidth.js"></script>
+  <script type="text/javascript" src="../../jquery.caruso.injector.js"></script>
+  <script type="text/javascript" src="../../jquery.caruso.grid.js"></script>
+  <script type="text/javascript">
+  (function() {
+    var ds = (function() {
+      var that = {};
+
+      that.getData = function(sortOptions, callback) {
+        if(!callback) {
+          callback = sortOptions;
+        }
+        callback([
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+          { customer: 'Buck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' }
+        ]);
+      };
+      
+      return that;
+    })();
+    $('#customers').carusoGrid({
+      getData: ds.getData,
+    });
+    $('.expand').click(function(evt) {
+      var row = $(evt.originalTarget).closest('tr');
+      console.log(row.children().length);
+      var newRow = $('<tr class="expanded" />');
+      newRow.append('<td colspan="' + row.children().length + '" class="subgrid">Hi, this is a really really really really really long row</td>');
+      row.after(newRow);
+    });
+  })();
+  </script>
+</body>
+</html>
