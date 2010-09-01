@@ -55,7 +55,7 @@
           $clickedRow = $clickedCell.closest('tr'),
           $detailRow;
       if($clickedCell.length) {
-        $detailRow = $('<tr><td colspan="' + 5 + '" class="caruso-detail-cell" /></tr>');
+        $detailRow = $('<tr><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
         $detailCell = $detailRow.find('td');
         $detailTable = $('<table><tbody /></table>');
         $detailBody = $detailTable.find('tbody');
