@@ -53,14 +53,11 @@
       };
     });
 
-    var expandClickHandler = (function() {
-      var that = {};
-
-      that.handles = function($target) {
+    var expandClickHandler = {
+      handles: function($target) {
         return $target.closest('td.expand').length === 1;
-      };
-
-      that.handle = function($target) {
+      },
+      handle: function($target) {
         var $clickedCell = $target.closest('td.expand'),
             $clickedRow = $clickedCell.closest('tr'),
             $detailRow = $clickedRow.next('.caruso-detail-row');
@@ -85,10 +82,8 @@
             $clickedRow.after($detailRow);
           }
         }
-      };
-
-      return that;
-    })();
+      }
+    };
     var bodyHandlers = [expandClickHandler];
 
     $bodyDiv.click(function(evt) {
