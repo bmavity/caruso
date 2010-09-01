@@ -53,7 +53,7 @@
           sortItem = $clickedHeader.length && $clickedHeader.data(sortDataKey);
 
       if(sortItem) {
-        sortItem.direction = sortItem.direction === 'asc' ? 'desc' : 'asc';
+        sortItem.order = sortItem.order === 'asc' ? 'desc' : 'asc';
         config.dataSource.getData(sortItem, setData);
       };
     });
@@ -142,7 +142,7 @@
           field = $this.attr('class');
       $this.data(sortDataKey, {
         field: field,
-        direction: 'asc'
+        order: 'desc'
       });
     });
 

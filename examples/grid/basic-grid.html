@@ -362,17 +362,17 @@
           ];
 
       that.getData = function(sortOptions, callback) {
-        var directionFactor;
+        var orderFactor;
 
         if(!callback) {
           callback = sortOptions;
           sortOptions = null;
         }
         if(sortOptions) {
-          directionFactor = sortOptions.direction === 'asc' ? 1 : -1;
+          orderFactor = sortOptions.order === 'asc' ? 1 : -1;
           items.sort(function(a, b) {
-            if(a[sortOptions.field] > b[sortOptions.field]) return 1 * directionFactor;
-            if(a[sortOptions.field] < b[sortOptions.field]) return -1 * directionFactor;
+            if(a[sortOptions.field] > b[sortOptions.field]) return 1 * orderFactor;
+            if(a[sortOptions.field] < b[sortOptions.field]) return -1 * orderFactor;
             return 0;
           });
         }
