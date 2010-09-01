@@ -84,7 +84,24 @@
         }
       }
     };
-    var bodyHandlers = [expandClickHandler];
+
+    var selectClickHandler = {
+      handles: function($target) {
+        return $target.closest('tr').length === 1;
+      },
+      handle: function($target) {
+        var $selectedRow = $target.closest('tr');
+        if(!config.multiSelect) {
+          $body.find('.caruso-selected').removeClass('caruso-selected');
+        }
+        $selectedRow.addClass('caruso-selected');
+        if(config.rowSelectedHandler) {
+          config.rowSelectedHandler($selectedRow.data(rowDataKey));
+        }
+      }
+    };
+
+    var bodyHandlers = [expandClickHandler, selectClickHandler];
 
     $bodyDiv.click(function(evt) {
       var $target = $(evt.target),
@@ -160,7 +177,9 @@
           },
           dimensions: dimensions,
           model: model,
-          $placeholder: this
+          multiSelect: config.multiSelect,
+          $placeholder: this,
+          rowSelectedHandler: config.rowSelectedHandler
         });
     return grid;
   };

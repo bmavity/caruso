@@ -119,6 +119,9 @@
         cursor: default;
         background-color: #CCC;
       }
+      .caruso-grid .caruso-grid-body tr.caruso-selected td {
+        background-color: #999;
+      }
       .caruso-grid .caruso-detail-cell table {
         margin-left: 20px;
         width: 765px;
@@ -392,6 +395,10 @@
           quantity: {},
           state: {}
         }
+      },
+      multiSelect: true,
+      rowSelectedHandler: function(rowData) {
+        console.log(rowData);
       }
     });
     $('button').click(function() {
