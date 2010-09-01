@@ -91,10 +91,10 @@
       },
       handle: function($target) {
         var $selectedRow = $target.closest('tr');
+        $selectedRow.addClass('caruso-selected');
         if(!config.multiSelect) {
           $body.find('.caruso-selected').removeClass('caruso-selected');
         }
-        $selectedRow.addClass('caruso-selected');
         if(config.rowSelectedHandler) {
           config.rowSelectedHandler($selectedRow.data(rowDataKey));
         }
