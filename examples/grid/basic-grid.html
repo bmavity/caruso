@@ -6,7 +6,7 @@
   <style type="text/css">
     .customer {
       text-align: left;
-      width: 189px;
+      width: 169px;
     }
     .city {
       text-align: left;
@@ -343,6 +343,14 @@
             { customer: 'Guck Phillips', company: 'Cteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
             { customer: 'Huck Phillips', company: 'Bteal Your Change Subs', city: 'Red Bank', state: 'CA' },
             { customer: 'Iuck Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
+          ],
+          orders = [
+            { order: 'Hot Dog', quantity: 1, state: 'IL' },
+            { order: 'Hot Dog', quantity: 2, state: 'IL' },
+            { order: 'Hot Dog', quantity: 3, state: 'IL' },
+            { order: 'Hot Dog', quantity: 4, state: 'IL' },
+            { order: 'Hot Dog', quantity: 5, state: 'IL' },
+            { order: 'Hot Dog', quantity: 6, state: 'IL' }
           ];
 
       that.getData = function(sortOptions, callback) {
@@ -368,17 +376,15 @@
     $('#customers').carusoGrid({
       dataSource: ds,
       detail: {
-        getData: function(a) {
-          console.log(a);
+        getData: function(sortOptions, callback) {
+          console.log(sortOptions, callback);
+        },
+        model: {
+          order: {},
+          quantity: {},
+          state: {}
         }
       }
-    });
-    $('.expand').click(function(evt) {
-      var row = $(evt.originalTarget).closest('tr');
-      console.log(row.children().length);
-      var newRow = $('<tr class="expanded" />');
-      newRow.append('<td colspan="' + row.children().length + '" class="subgrid">Hi, this is a really really really really really long row</td>');
-      row.after(newRow);
     });
   })();
   </script>

@@ -10,6 +10,9 @@
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody');
 
+    if(config.detail) {
+      config.model.$headerRow.prepend($('<th class="expand" />'));
+    }
     $grid.height(config.dimensions.height);
     $grid.width(config.dimensions.width);
     $head.append(config.model.$headerRow);
@@ -24,9 +27,14 @@
     };
 
     var setData = function(data) {
-      var $p = $('<div />');
+      var $p = $('<div />'),
+          $row;
       $.each(data, function() {
-         $p.append(config.model.$dataRow.clone().inject(this));
+        $row = config.model.$dataRow.clone().inject(this);
+        if(config.detail) {
+          $row.prepend($('<td class="expand" />'));
+        }
+        $p.append($row);
       });
       $body.empty().append($p.children());
       setColumnWidths();
@@ -69,6 +77,16 @@
     };
   };
 
+  var createDetailModel = function(model) {
+    var $row = $('<tr />');
+    for(var key in model) {
+      $row.append($('<td class="' + key + '" />'));
+    }
+    return {
+      $dataRow: $row
+    };
+  };
+
   $.fn.carusoGrid = function carusoGrid(config) {
     var model = createModel(this),
         dimensions = {
@@ -77,7 +95,12 @@
         },
         grid = createGrid({
           dataSource: config.dataSource,
-          detail: config.detail,
+          detail: {
+            dataSource: {
+              getData: config.detail.getData
+            },
+            model: createDetailModel(config.detail.model)
+          },
           dimensions: dimensions,
           model: model,
           $placeholder: this
