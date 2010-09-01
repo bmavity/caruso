@@ -375,8 +375,8 @@
         callback(items);
       };
 
-      that.getDetailData = function(sortOptions, callback) {
-        callback = callback || sortOptions;
+      that.getDetailData = function(rowData, callback) {
+        callback = callback || rowData;
         callback(orders);
       };
       

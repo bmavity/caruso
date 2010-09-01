@@ -1,6 +1,7 @@
 (function($) {
   var scrollbarWidth = $.getScrollbarWidth(),
-      sortDataKey = 'caruso.grid.sortData';
+      sortDataKey = 'caruso.grid.sortData',
+      rowDataKey = 'caruso.grid.rowData';
 
   var createGrid = function(config) {
     var $grid = $('<div class="caruso-grid" />'),
@@ -31,6 +32,7 @@
           $row;
       $.each(data, function() {
         $row = config.model.$dataRow.clone().inject(this);
+        $row.data(rowDataKey, this);
         if(config.detail) {
           $row.prepend($('<td class="expand" />'));
         }
@@ -67,7 +69,7 @@
           $detailTable = $('<table><tbody /></table>');
           $detailBody = $detailTable.find('tbody');
           $detailCell.append($detailTable);
-          config.detail.dataSource.getData({}, function(a) {
+          config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(a) {
             $.each(a, function() {
               $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
             });
