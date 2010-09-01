@@ -9,7 +9,8 @@
         $head = $headerDiv.find('thead'),
         $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>'),
         $bodyTable = $bodyDiv.find('table'),
-        $body = $bodyDiv.find('tbody');
+        $body = $bodyDiv.find('tbody'),
+        that = {};
 
     if(config.detail) {
       config.model.$headerRow.prepend($('<th class="expand" />'));
@@ -79,8 +80,21 @@
       }
     });
 
+    that.updateRow = function(updateParams) {
+      var $rows = $bodyTable.find('tbody > tr'),
+          rowData;
+      var $matchingRow = $rows.filterOne(function($row) {
+        rowData = $row.data(rowDataKey);
+        return rowData[updateParams.key.name] === updateParams.key.val;
+      });
+      $.extend(rowData, updateParams.data);
+      $matchingRow.inject(rowData);
+    };
+
     config.$placeholder.replaceWith($grid);
     config.dataSource.getData(setData);
+    
+    return that;
   };
   
   var createModel = function($template) {
@@ -134,5 +148,6 @@
           model: model,
           $placeholder: this
         });
+    return grid;
   };
 })(jQuery);
