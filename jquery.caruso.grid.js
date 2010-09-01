@@ -53,19 +53,27 @@
     $bodyDiv.click(function(evt) {
       var $clickedCell = $(evt.target).closest('td.expand'),
           $clickedRow = $clickedCell.closest('tr'),
-          $detailRow;
+          $detailRow = $clickedRow.next('.caruso-detail-row');
       if($clickedCell.length) {
-        $detailRow = $('<tr><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
-        $detailCell = $detailRow.find('td');
-        $detailTable = $('<table><tbody /></table>');
-        $detailBody = $detailTable.find('tbody');
-        $detailCell.append($detailTable);
-        config.detail.dataSource.getData({}, function(a) {
-          $.each(a, function() {
-            $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+        if($detailRow.length) {
+          if($detailRow.is(':visible')) {
+            $detailRow.hide();
+          } else {
+            $detailRow.show();
+          }
+        } else {
+          $detailRow = $('<tr class="caruso-detail-row"><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
+          $detailCell = $detailRow.find('td');
+          $detailTable = $('<table><tbody /></table>');
+          $detailBody = $detailTable.find('tbody');
+          $detailCell.append($detailTable);
+          config.detail.dataSource.getData({}, function(a) {
+            $.each(a, function() {
+              $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+            });
           });
-        });
-        $clickedRow.after($detailRow);
+          $clickedRow.after($detailRow);
+        }
       }
     });
 
