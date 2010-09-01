@@ -169,7 +169,7 @@
         },
         grid = createGrid({
           dataSource: config.dataSource,
-          detail: {
+          detail: config.detail && {
             dataSource: {
               getData: config.detail.getData
             },
