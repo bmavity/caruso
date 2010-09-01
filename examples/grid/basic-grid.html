@@ -342,15 +342,15 @@
     var ds = (function() {
       var that = {},
           items = [
-            { customer: 'Auck Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-            { customer: 'Buck Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
-            { customer: 'Cuck Phillips', company: 'Gteal Your Change Subs', city: 'Hazlet', state: 'NJ' },
-            { customer: 'Duck Phillips', company: 'Fteal Your Change Subs', city: 'Itasca', state: 'IL' },
-            { customer: 'Euck Phillips', company: 'Eteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-            { customer: 'Zuck Phillips', company: 'Dteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-            { customer: 'Guck Phillips', company: 'Cteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
-            { customer: 'Huck Phillips', company: 'Bteal Your Change Subs', city: 'Red Bank', state: 'CA' },
-            { customer: 'Iuck Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
+            { firstName: 'Auck', lastName: 'Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Buck', lastName: 'Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
+            { firstName: 'Cuck', lastName: 'Phillips', company: 'Gteal Your Change Subs', city: 'Hazlet', state: 'NJ' },
+            { firstName: 'Duck', lastName: 'Phillips', company: 'Fteal Your Change Subs', city: 'Itasca', state: 'IL' },
+            { firstName: 'Euck', lastName: 'Phillips', company: 'Eteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Zuck', lastName: 'Phillips', company: 'Dteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Guck', lastName: 'Phillips', company: 'Cteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Huck', lastName: 'Phillips', company: 'Bteal Your Change Subs', city: 'Red Bank', state: 'CA' },
+            { firstName: 'Iuck', lastName: 'Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
           ],
           orders = [
             { order: 'Hot Dog', quantity: 1, state: 'IL' },
@@ -397,6 +397,11 @@
         }
       },
       multiSelect: true,
+	  rowDataTransformer: function(dataItem) {
+		return $.extend(dataItem, {
+			customer: dataItem.lastName + ', ' + dataItem.firstName
+		});
+	  },
       rowSelectedHandler: function(rowData) {
         console.log(rowData);
       }

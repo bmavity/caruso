@@ -30,8 +30,13 @@
 
     var setData = function(data) {
       var $p = $('<div />'),
-          $row;
-      $.each(data, function() {
+          $row,
+          transformedData;
+    
+      if(config.rowDataTransformer) {
+        transformedData = $.map(data, config.rowDataTransformer);
+      }
+      $.each((transformedData || data), function() {
         $row = config.model.$dataRow.clone().inject(this);
         $row.data(rowDataKey, this);
         if(config.detail) {
@@ -179,7 +184,8 @@
           model: model,
           multiSelect: config.multiSelect,
           $placeholder: this,
-          rowSelectedHandler: config.rowSelectedHandler
+          rowSelectedHandler: config.rowSelectedHandler,
+          rowDataTransformer: config.rowDataTransformer
         });
     return grid;
   };
