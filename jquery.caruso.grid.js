@@ -53,31 +53,50 @@
       };
     });
 
-    $bodyDiv.click(function(evt) {
-      var $clickedCell = $(evt.target).closest('td.expand'),
-          $clickedRow = $clickedCell.closest('tr'),
-          $detailRow = $clickedRow.next('.caruso-detail-row');
-      if($clickedCell.length) {
-        if($detailRow.length) {
-          if($detailRow.is(':visible')) {
-            $detailRow.hide();
+    var expandClickHandler = (function() {
+      var that = {};
+
+      that.handles = function($target) {
+        return $target.closest('td.expand').length === 1;
+      };
+
+      that.handle = function($target) {
+        var $clickedCell = $target.closest('td.expand'),
+            $clickedRow = $clickedCell.closest('tr'),
+            $detailRow = $clickedRow.next('.caruso-detail-row');
+        if($clickedCell.length) {
+          if($detailRow.length) {
+            if($detailRow.is(':visible')) {
+              $detailRow.hide();
+            } else {
+              $detailRow.show();
+            }
           } else {
-            $detailRow.show();
-          }
-        } else {
-          $detailRow = $('<tr class="caruso-detail-row"><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
-          $detailCell = $detailRow.find('td');
-          $detailTable = $('<table><tbody /></table>');
-          $detailBody = $detailTable.find('tbody');
-          $detailCell.append($detailTable);
-          config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(a) {
-            $.each(a, function() {
-              $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+            $detailRow = $('<tr class="caruso-detail-row"><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
+            $detailCell = $detailRow.find('td');
+            $detailTable = $('<table><tbody /></table>');
+            $detailBody = $detailTable.find('tbody');
+            $detailCell.append($detailTable);
+            config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(a) {
+              $.each(a, function() {
+                $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+              });
             });
-          });
-          $clickedRow.after($detailRow);
+            $clickedRow.after($detailRow);
+          }
         }
-      }
+      };
+
+      return that;
+    })();
+    var bodyHandlers = [expandClickHandler];
+
+    $bodyDiv.click(function(evt) {
+      var $target = $(evt.target),
+          matchingHandler = $.filterOne(bodyHandlers, function(handler) {
+            return handler.handles($target);
+          });
+      matchingHandler.handle($target);
     });
 
     that.updateRow = function(updateParams) {
