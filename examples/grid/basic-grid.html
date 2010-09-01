@@ -370,15 +370,18 @@
         }
         callback(items);
       };
+
+      that.getDetailData = function(sortOptions, callback) {
+        callback = callback || sortOptions;
+        callback(orders);
+      };
       
       return that;
     })();
     $('#customers').carusoGrid({
       dataSource: ds,
       detail: {
-        getData: function(sortOptions, callback) {
-          console.log(sortOptions, callback);
-        },
+        getData: ds.getDetailData,
         model: {
           order: {},
           quantity: {},

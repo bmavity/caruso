@@ -50,6 +50,25 @@
       };
     });
 
+    $bodyDiv.click(function(evt) {
+      var $clickedCell = $(evt.target).closest('td.expand'),
+          $clickedRow = $clickedCell.closest('tr'),
+          $detailRow;
+      if($clickedCell.length) {
+        $detailRow = $('<tr><td colspan="' + 5 + '" class="caruso-detail-cell" /></tr>');
+        $detailCell = $detailRow.find('td');
+        $detailTable = $('<table><tbody /></table>');
+        $detailBody = $detailTable.find('tbody');
+        $detailCell.append($detailTable);
+        config.detail.dataSource.getData({}, function(a) {
+          $.each(a, function() {
+            $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+          });
+        });
+        $clickedRow.after($detailRow);
+      }
+    });
+
     config.$placeholder.replaceWith($grid);
     config.dataSource.getData(setData);
   };
