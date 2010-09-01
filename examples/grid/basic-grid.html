@@ -99,7 +99,7 @@
           .caruso-grid .caruso-grid-body tr:first-child td {
             border-top: none;
           }
-          .caruso-grid .caruso-grid-body tr:hover td {
+          .caruso-grid .caruso-grid-body tr:hover > td {
             cursor: pointer;
             background-color: #999;
           }
@@ -115,6 +115,10 @@
       border-top: solid 1px black;
       padding: 0;
     }
+      .caruso-grid .caruso-grid-body tr:hover td.caruso-detail-cell {
+        cursor: default;
+        background-color: #CCC;
+      }
       .caruso-grid .caruso-detail-cell table {
         margin-left: 20px;
         width: 765px;
