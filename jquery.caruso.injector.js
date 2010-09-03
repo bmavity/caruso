@@ -1,28 +1,25 @@
 (function($) {
-  $.filterOne = function(arrayLike, filterFunction) {
+  var filterOne = function(arrayLike, filterFn, transformFn) {
     var len = arrayLike.length,
         item,
         i;
     
     for(i = 0; i < len; i += 1) {
-      item = arrayLike[i];
-      if(filterFunction(item)) {
+      item = (transformFn && transformFn(arrayLike[i])) || arrayLike[i];
+      if(filterFn(item)) {
         return item;
       }
     }
   };
 
-  $.fn.filterOne = function(filterFunction) {
-    var len = this.length,
-        $element,
-        i;
-    
-    for(i = 0; i < len; i += 1) {
-      $element = $(this[i]);
-      if(filterFunction($element)) {
-        return $element;
-      }
-    }
+  $.filterOne = function(arrayLike, filterFn) {
+    return filterOne(arrayLike, filterFn);
+  };
+
+  $.fn.filterOne = function(filterFn) {
+    return filterOne(this, filterFn, function(ele) {
+      return $(ele);
+    });
   };
 })(jQuery);
 
