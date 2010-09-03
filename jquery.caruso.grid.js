@@ -114,24 +114,51 @@
 
     var selectClickHandler = (function() {
       var rowSelectedClassName = 'caruso-selected',
+          selectedRowSelector = 'tr.' + rowSelectedClassName,
           that = {};
+
+      var deselectAll = function() {
+        $bodyTable.find(selectedRowSelector).removeClass(rowSelectedClassName);
+      };
       
       that.handles = function($target) {
         return $target.closest('tr').length === 1;
       };
 
       that.handle = function($target, evt) {
-        var $selectedRow = $target.closest('tr');
-        if($selectedRow.hasClass(rowSelectedClassName)) {
-          $selectedRow.removeClass(rowSelectedClassName);
-        } else {
-          $selectedRow.addClass(rowSelectedClassName);
-          if(!config.multiSelect) {
-            $body.find(rowSelectedClassName).removeClass(rowSelectedClassName);
-          }
+        var $clickedRow = $target.closest('tr'),
+            rowIsSelected = $clickedRow.hasClass(rowSelectedClassName);
+
+        var deselectRow = function() {
+          $clickedRow.removeClass(rowSelectedClassName);
+        };
+
+        var selectRow = function() {
+          $clickedRow.addClass(rowSelectedClassName);
           if(config.rowSelectedHandler) {
-            config.rowSelectedHandler($selectedRow.data(rowDataKey));
+            config.rowSelectedHandler($clickedRow.data(rowDataKey));
           }
+        };
+
+        var toggleSelection = function() {
+          if(rowIsSelected) {
+            deselectRow();
+          } else {
+            selectRow();
+          }
+        };
+
+        if(config.multiSelect) {
+          if(evt.metaKey) {
+            toggleSelection();
+          } else {
+            if(!rowIsSelected) {
+              deselectAll();
+              selectRow();
+            }
+          }
+        } else {
+          toggleSelection();
         }
       };
 
@@ -143,9 +170,9 @@
     $bodyDiv.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(bodyHandlers, function(handler) {
-            return handler.handles($target, evt);
+            return handler.handles($target);
           });
-      matchingHandler.handle($target);
+      matchingHandler.handle($target, evt);
     });
 
     that.updateRow = function(updateParams) {
