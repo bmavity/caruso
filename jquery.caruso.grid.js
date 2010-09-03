@@ -10,21 +10,29 @@
         $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>'),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
+        lastColumnWidth = config.$placeholder.find('th:last-child').width(),
+        firstColumnWidth = config.$placeholder.find('th:first-child').width(),
+        expandColumnWidth,
         that = {};
 
-    if(config.detail) {
-      config.model.$headerRow.prepend($('<th class="expand" />'));
-    }
     $grid.height(config.dimensions.height);
     $grid.width(config.dimensions.width);
     $head.append(config.model.$headerRow);
     $grid.append($headerDiv).append($bodyDiv);
 
     var setColumnWidths = function() {
-      var lastColumnWidth = $headerDiv.find('th:last-child').width();
+      $bodyTable.width($grid.width());
+      $headerDiv.find('table').width($grid.width());
+
       if($bodyDiv.height() < $bodyTable.height()) {
         $bodyTable.width($grid.width() - scrollbarWidth);
         $grid.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
+      }
+      if(config.detail) {
+        $grid.find('.caruso-grid-head tr').prepend($('<th class="caruso-expand" />'));
+        $grid.find('.caruso-grid-body tr').prepend($('<td class="caruso-expand" />'));
+        $grid.find('th:nth-child(2)').width(firstColumnWidth - expandColumnWidth);
+        $grid.find('td:nth-child(2)').width(firstColumnWidth - expandColumnWidth);
       }
     };
 
@@ -39,9 +47,6 @@
       $.each((transformedData || data), function() {
         $row = config.model.$dataRow.clone().inject(this);
         $row.data(rowDataKey, this);
-        if(config.detail) {
-          $row.prepend($('<td class="expand" />'));
-        }
         $p.append($row);
       });
       $body.empty().append($p.children());
@@ -60,10 +65,10 @@
 
     var expandClickHandler = {
       handles: function($target) {
-        return $target.closest('td.expand').length === 1;
+        return $target.closest('td.caruso-expand').length === 1;
       },
       handle: function($target) {
-        var $clickedCell = $target.closest('td.expand'),
+        var $clickedCell = $target.closest('td.caruso-expand'),
             $clickedRow = $clickedCell.closest('tr'),
             $detailRow = $clickedRow.next('.caruso-detail-row');
         if($clickedCell.length) {
@@ -79,10 +84,17 @@
             $detailTable = $('<table><tbody /></table>');
             $detailBody = $detailTable.find('tbody');
             $detailCell.append($detailTable);
-            config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(a) {
-              $.each(a, function() {
-                $detailBody.append(config.detail.model.$dataRow.clone().inject(this));
+            config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(data) {
+              var isScrolling = $bodyDiv.height() < $bodyTable.height(),
+                  lastColumnScrollingWidth = lastColumnWidth - scrollbarWidth;
+              $.each(data, function() {
+                var $populatedRow = config.detail.model.$dataRow.clone().inject(this);
+                $populatedRow.data(rowDataKey, this);
+                $detailBody.append($populatedRow);
               });
+              if(isScrolling) {
+                $detailRow.find('td:last-child').width(lastColumnScrollingWidth);
+              }
             });
             $clickedRow.after($detailRow);
           }
@@ -126,6 +138,19 @@
       $.extend(rowData, updateParams.data);
       $matchingRow.inject(rowData);
     };
+
+    var dummy = config.$placeholder.clone();
+    dummy.empty().append('<table class="caruso-grid-head caruso-grid-body"><tbody><tr><td class="caruso-expand" /></tr></tbody></table>');
+    dummy.css({
+        'border': 'none',
+        'height': 'auto',
+        'left': '-10000',
+        'position': 'absolute',
+        'width': 'auto'
+    });
+    $('body').append(dummy);
+    expandColumnWidth = dummy.find('.caruso-expand').outerWidth();
+    dummy.remove();
 
     config.$placeholder.replaceWith($grid);
     config.dataSource.getData(setData);
