@@ -29,7 +29,9 @@
         $grid.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
       }
       if(config.detail) {
-        $grid.find('.caruso-grid-head tr').prepend($('<th class="caruso-expand" />'));
+        if($grid.find('.caruso-grid-head tr th.caruso-expand').length === 0) {
+          $grid.find('.caruso-grid-head tr').prepend($('<th class="caruso-expand" />'));
+        }
         $grid.find('.caruso-grid-body tr').prepend($('<td class="caruso-expand" />'));
         $grid.find('th:nth-child(2)').width(firstColumnWidth - expandColumnWidth);
         $grid.find('td:nth-child(2)').width(firstColumnWidth - expandColumnWidth);
