@@ -112,28 +112,38 @@
       }
     };
 
-    var selectClickHandler = {
-      handles: function($target) {
+    var selectClickHandler = (function() {
+      var rowSelectedClassName = 'caruso-selected',
+          that = {};
+      
+      that.handles = function($target) {
         return $target.closest('tr').length === 1;
-      },
-      handle: function($target) {
+      };
+
+      that.handle = function($target, evt) {
         var $selectedRow = $target.closest('tr');
-        $selectedRow.addClass('caruso-selected');
-        if(!config.multiSelect) {
-          $body.find('.caruso-selected').removeClass('caruso-selected');
+        if($selectedRow.hasClass(rowSelectedClassName)) {
+          $selectedRow.removeClass(rowSelectedClassName);
+        } else {
+          $selectedRow.addClass(rowSelectedClassName);
+          if(!config.multiSelect) {
+            $body.find(rowSelectedClassName).removeClass(rowSelectedClassName);
+          }
+          if(config.rowSelectedHandler) {
+            config.rowSelectedHandler($selectedRow.data(rowDataKey));
+          }
         }
-        if(config.rowSelectedHandler) {
-          config.rowSelectedHandler($selectedRow.data(rowDataKey));
-        }
-      }
-    };
+      };
+
+      return that;
+    })();
 
     var bodyHandlers = [expandClickHandler, selectClickHandler];
 
     $bodyDiv.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(bodyHandlers, function(handler) {
-            return handler.handles($target);
+            return handler.handles($target, evt);
           });
       matchingHandler.handle($target);
     });
