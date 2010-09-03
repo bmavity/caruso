@@ -42,17 +42,9 @@
       },
       setters = [htmlSetter, valSetter];
 
-  var pascalize = function(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
-
-  var camelize = function(str) {
-    return str.charAt(0).toLowerCase() + str.slice(1);
-  };
-
   var findElements = function($element, propertyName) {
-    var findByIdSelector = '#' + pascalize(propertyName),
-        findByClassSelector = '.' + camelize(propertyName);
+    var findByIdSelector = '#' + $.pascalize(propertyName),
+        findByClassSelector = '.' + $.camelize(propertyName);
     return $element.find(findByClassSelector);
   };
 
@@ -73,6 +65,4 @@
     return this;
   };
 
-  $.pascalize = pascalize;
-  $.camelize = camelize;
 })(jQuery);
