@@ -86,8 +86,12 @@
             $detailCell.append($detailTable);
             config.detail.dataSource.getData($clickedRow.data(rowDataKey), function(data) {
               var isScrolling = $bodyDiv.height() < $bodyTable.height(),
-                  lastColumnScrollingWidth = lastColumnWidth - scrollbarWidth;
-              $.each(data, function() {
+                  lastColumnScrollingWidth = lastColumnWidth - scrollbarWidth,
+                  transformedData;
+              if(config.detail.rowDataTransformer) {
+                transformedData = $.map(data, config.detail.rowDataTransformer);
+              }
+              $.each((transformedData || data), function() {
                 var $populatedRow = config.detail.model.$dataRow.clone().inject(this);
                 $populatedRow.data(rowDataKey, this);
                 $detailBody.append($populatedRow);
@@ -203,7 +207,8 @@
             dataSource: {
               getData: config.detail.getData
             },
-            model: createDetailModel(config.detail.model)
+            model: createDetailModel(config.detail.model),
+            rowDataTransformer: config.detail.rowDataTransformer
           },
           dimensions: dimensions,
           model: model,
