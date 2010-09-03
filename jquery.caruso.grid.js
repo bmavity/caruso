@@ -72,15 +72,19 @@
       handle: function($target) {
         var $clickedCell = $target.closest('td.caruso-expand'),
             $clickedRow = $clickedCell.closest('tr'),
-            $detailRow = $clickedRow.next('.caruso-detail-row');
+            $detailRow = $clickedRow.next('.caruso-detail-row'),
+            expandedRowClassName = 'caruso-expanded';
         if($clickedCell.length) {
           if($detailRow.length) {
             if($detailRow.is(':visible')) {
               $detailRow.hide();
+              $clickedRow.removeClass(expandedRowClassName);
             } else {
+              $clickedRow.addClass(expandedRowClassName);
               $detailRow.show();
             }
           } else {
+            $clickedRow.addClass(expandedRowClassName);
             $detailRow = $('<tr class="caruso-detail-row"><td colspan="' + (config.model.$dataRow.children().length + 1) + '" class="caruso-detail-cell" /></tr>');
             $detailCell = $detailRow.find('td');
             $detailTable = $('<table><tbody /></table>');
