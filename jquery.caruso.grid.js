@@ -127,14 +127,30 @@
 
       that.handle = function($target, evt) {
         var $clickedRow = $target.closest('tr'),
-            rowIsSelected = $clickedRow.hasClass(rowSelectedClassName);
+            rowIsSelected = $clickedRow.hasClass(rowSelectedClassName),
+            $detailRow = $clickedRow.next('tr.caruso-detail-row'),
+            rowHasDetails = $detailRow.length !== 0;
+
+        var deselectDetailRows = function() {
+          $detailRow.find('tbody tr').removeClass(rowSelectedClassName);
+        };
+
+        var selectDetailRows = function() {
+          $detailRow.find('tbody tr').addClass(rowSelectedClassName);
+        };
 
         var deselectRow = function() {
           $clickedRow.removeClass(rowSelectedClassName);
+          if(rowHasDetails) {
+            deselectDetailRows();
+          }
         };
 
         var selectRow = function() {
           $clickedRow.addClass(rowSelectedClassName);
+          if(rowHasDetails) {
+            selectDetailRows();
+          }
           if(config.rowSelectedHandler) {
             config.rowSelectedHandler($clickedRow.data(rowDataKey));
           }
