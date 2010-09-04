@@ -72,6 +72,7 @@
       handle: function($target) {
         var $clickedCell = $target.closest('td.caruso-expand'),
             $clickedRow = $clickedCell.closest('tr'),
+            clickedRowIsSelected = $clickedRow.hasClass('caruso-selected'),
             $detailRow = $clickedRow.next('.caruso-detail-row'),
             expandedRowClassName = 'caruso-expanded';
         if($clickedCell.length) {
@@ -100,6 +101,9 @@
               $.each((transformedData || data), function() {
                 var $populatedRow = config.detail.model.$dataRow.clone().inject(this);
                 $populatedRow.data(rowDataKey, this);
+                if(clickedRowIsSelected) {
+                  $populatedRow.addClass('caruso-selected');
+                }
                 $detailBody.append($populatedRow);
               });
               if(isScrolling) {
