@@ -140,7 +140,12 @@
         };
 
         var selectDetailRows = function() {
-          $detailRow.find('tbody tr').addClass(rowSelectedClassName);
+          var $detailRows = $detailRow.find('tbody tr').addClass(rowSelectedClassName);
+          if(config.rowSelectedHandler) {
+            $detailRows.each(function() {
+              config.rowSelectedHandler($(this).data(rowDataKey));
+            });
+          }
         };
 
         var deselectRow = function() {
@@ -152,11 +157,11 @@
 
         var selectRow = function() {
           $clickedRow.addClass(rowSelectedClassName);
-          if(rowHasDetails) {
-            selectDetailRows();
-          }
           if(config.rowSelectedHandler) {
             config.rowSelectedHandler($clickedRow.data(rowDataKey));
+          }
+          if(rowHasDetails) {
+            selectDetailRows();
           }
         };
 
