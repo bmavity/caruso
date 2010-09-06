@@ -401,13 +401,16 @@
         }
       },
       multiSelect: true,
-	  rowDataTransformer: function(dataItem) {
-		return $.extend(dataItem, {
-			customer: dataItem.lastName + ', ' + dataItem.firstName
-		});
-	  },
+      rowDataTransformer: function(dataItem) {
+        return $.extend(dataItem, {
+          customer: dataItem.lastName + ', ' + dataItem.firstName
+        });
+      },
       rowSelectedHandler: function(rowData) {
         console.log(rowData);
+      },
+      rowDeselectedHandler: function(rowData) {
+        console.log('deselected: ', rowData);
       }
     });
     $('button').click(function() {

@@ -146,7 +146,13 @@
           partiallySelectedRowSelector = 'tr.' + partiallySelectedRowClassName;
 
       var deselectAll = function() {
-        $bodyTable.find(selectedRowSelector).removeClass(rowSelectedClassName);
+        $selectedRows = $bodyTable.find(selectedRowSelector);
+        $selectedRows.removeClass(rowSelectedClassName);
+        if(config.rowDeselectedHandler) {
+          $selectedRows.each(function() {
+            config.rowDeselectedHandler($(this).data(rowDataKey));
+          });
+        }
       };
       
       that.handles = function($target) {
@@ -165,6 +171,11 @@
 
         var deselectDetailRows = function() {
           $detailRow.find('tbody tr').removeClass(rowSelectedClassName);
+          if(config.rowDeselectedHandler) {
+            $detailRows.each(function() {
+              config.rowDeselectedHandler($(this).data(rowDataKey));
+            });
+          }
         };
 
         var selectDetailRows = function() {
@@ -178,6 +189,9 @@
 
         var deselectRow = function() {
           $clickedRow.removeClass(rowSelectedClassName);
+          if(config.rowDeselectedHandler) {
+            config.rowDeselectedHandler($clickedRow.data(rowDataKey));
+          }
           if(rowHasDetails) {
             deselectDetailRows();
           } else if(isDetailRow) {
@@ -328,6 +342,7 @@
           multiSelect: config.multiSelect,
           $placeholder: this,
           rowSelectedHandler: config.rowSelectedHandler,
+          rowDeselectedHandler: config.rowDeselectedHandler,
           rowDataTransformer: config.rowDataTransformer
         });
     return grid;
