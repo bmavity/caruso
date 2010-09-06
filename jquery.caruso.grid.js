@@ -1,7 +1,36 @@
 (function($) {
   var scrollbarWidth = $.getScrollbarWidth(),
-      sortDataKey = 'caruso.grid.sortData',
       rowDataKey = 'caruso.grid.rowData';
+
+  var sortExtension = (function() {
+    var sortDataKey = 'caruso.grid.sortData',
+        thSelector = '.caruso-grid-head tr th',
+        that = {};
+
+    that.handles = function($target) {
+      return $target.closest(thSelector).length !== 0;
+    };
+
+    that.handle = function($target) {
+      var $clickedHeader = $target.closest(thSelector),
+          sortItem = $clickedHeader.data(sortDataKey);
+
+      if(sortItem) {
+        sortItem.order = sortItem.order === 'asc' ? 'desc' : 'asc';
+        this.loadData(sortItem);
+      };
+    };
+
+    that.enrichModel = function($th) {
+      var field = $th.attr('class');
+      $th.data(sortDataKey, {
+        field: field,
+        order: 'desc'
+      });
+    };
+
+    return that;
+  })();
 
   var createGrid = function(config) {
     var $grid = $('<div class="caruso-grid" />'),
@@ -55,16 +84,6 @@
       setColumnWidths();
     };
     
-    $headerDiv.click(function(evt) {
-      var $clickedHeader = $(evt.target).closest('th'),
-          sortItem = $clickedHeader.length && $clickedHeader.data(sortDataKey);
-
-      if(sortItem) {
-        sortItem.order = sortItem.order === 'asc' ? 'desc' : 'asc';
-        config.dataSource.getData(sortItem, setData);
-      };
-    });
-
     var expandClickHandler = {
       handles: function($target) {
         return $target.closest('td.caruso-expand').length === 1;
@@ -190,15 +209,24 @@
       return that;
     })();
 
-    var bodyHandlers = [expandClickHandler, selectClickHandler];
+    var bodyHandlers = [expandClickHandler, sortExtension, selectClickHandler];
 
-    $bodyDiv.click(function(evt) {
+    $grid.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(bodyHandlers, function(handler) {
             return handler.handles($target);
           });
-      matchingHandler.handle($target, evt);
+      matchingHandler.handle.call({ loadData: loadData }, $target, evt);
     });
+
+    var loadData = function() {
+      var args = $.makeArray(arguments),
+          dataSource = config.dataSource,
+          getData = dataSource.getData;
+
+      args.push(setData);
+      getData.apply(dataSource, args);
+    };
 
     that.updateRow = function(updateParams) {
       var $rows = $bodyTable.find('tbody > tr'),
@@ -235,12 +263,8 @@
         $dataRowTemplate = $template.find('table tbody tr:first-child').clone();
 
     $headerRowTemplate.children().each(function() {
-      var $this = $(this),
-          field = $this.attr('class');
-      $this.data(sortDataKey, {
-        field: field,
-        order: 'desc'
-      });
+      var $this = $(this);
+      sortExtension.enrichModel($this);
     });
 
     $dataRowTemplate.children().each(function(){
