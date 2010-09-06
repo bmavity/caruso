@@ -146,7 +146,8 @@
           partiallySelectedRowSelector = 'tr.' + partiallySelectedRowClassName;
 
       var deselectAll = function() {
-        $selectedRows = $bodyTable.find(selectedRowSelector);
+        $selectedRows = $bodyTable.find(selectedRowSelector + ', ' + partiallySelectedRowSelector);
+        $selectedRows.removeClass(partiallySelectedRowClassName);
         $selectedRows.removeClass(rowSelectedClassName);
         if(config.rowDeselectedHandler) {
           $selectedRows.each(function() {
@@ -203,6 +204,7 @@
         };
 
         var selectRow = function() {
+          $clickedRow.removeClass(partiallySelectedRowClassName);
           $clickedRow.addClass(rowSelectedClassName);
           if(config.rowSelectedHandler) {
             config.rowSelectedHandler($clickedRow.data(rowDataKey));
