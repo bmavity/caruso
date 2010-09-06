@@ -138,8 +138,8 @@
     };
 
     var selectClickHandler = (function() {
-      var rowSelectedClassName = 'caruso-selected',
-          selectedRowSelector = 'tr.' + rowSelectedClassName,
+      var selectedRowClassName = 'caruso-selected',
+          selectedRowSelector = 'tr.' + selectedRowClassName,
           that = {};
 
       var partiallySelectedRowClassName = 'caruso-partially-selected',
@@ -148,7 +148,7 @@
       var deselectAll = function() {
         $selectedRows = $bodyTable.find(selectedRowSelector + ', ' + partiallySelectedRowSelector);
         $selectedRows.removeClass(partiallySelectedRowClassName);
-        $selectedRows.removeClass(rowSelectedClassName);
+        $selectedRows.removeClass(selectedRowClassName);
         if(config.rowDeselectedHandler) {
           $selectedRows.each(function() {
             config.rowDeselectedHandler($(this).data(rowDataKey));
@@ -162,7 +162,7 @@
 
       that.handle = function($target, evt) {
         var $clickedRow = $target.closest('tr'),
-            rowIsSelected = $clickedRow.hasClass(rowSelectedClassName),
+            rowIsSelected = $clickedRow.hasClass(selectedRowClassName),
             $detailRow = $clickedRow.next('tr.caruso-detail-row'),
             rowHasDetails = $detailRow.length !== 0;
 
@@ -171,7 +171,7 @@
             $correspondingMasterRow = $clickedDetailRow.prev('tr');
 
         var deselectDetailRows = function() {
-          $detailRow.find('tbody tr').removeClass(rowSelectedClassName);
+          $detailRow.find('tbody tr').removeClass(selectedRowClassName);
           if(config.rowDeselectedHandler) {
             $detailRows.each(function() {
               config.rowDeselectedHandler($(this).data(rowDataKey));
@@ -180,7 +180,7 @@
         };
 
         var selectDetailRows = function() {
-          var $detailRows = $detailRow.find('tbody tr').addClass(rowSelectedClassName);
+          var $detailRows = $detailRow.find('tbody tr').addClass(selectedRowClassName);
           if(config.rowSelectedHandler) {
             $detailRows.each(function() {
               config.rowSelectedHandler($(this).data(rowDataKey));
@@ -189,14 +189,14 @@
         };
 
         var deselectRow = function() {
-          $clickedRow.removeClass(rowSelectedClassName);
+          $clickedRow.removeClass(selectedRowClassName);
           if(config.rowDeselectedHandler) {
             config.rowDeselectedHandler($clickedRow.data(rowDataKey));
           }
           if(rowHasDetails) {
             deselectDetailRows();
           } else if(isDetailRow) {
-            $correspondingMasterRow.removeClass(rowSelectedClassName);
+            $correspondingMasterRow.removeClass(selectedRowClassName);
             if($clickedRow.siblings(selectedRowSelector).length !== 0) {
               $correspondingMasterRow.addClass(partiallySelectedRowClassName);
             }
@@ -205,7 +205,7 @@
 
         var selectRow = function() {
           $clickedRow.removeClass(partiallySelectedRowClassName);
-          $clickedRow.addClass(rowSelectedClassName);
+          $clickedRow.addClass(selectedRowClassName);
           if(config.rowSelectedHandler) {
             config.rowSelectedHandler($clickedRow.data(rowDataKey));
           }
@@ -214,7 +214,7 @@
           } else if(isDetailRow) {
             if($clickedRow.siblings().not(selectedRowSelector).length === 0) {
               $correspondingMasterRow.removeClass(partiallySelectedRowClassName);
-              $correspondingMasterRow.addClass(rowSelectedClassName);
+              $correspondingMasterRow.addClass(selectedRowClassName);
             } else {
               $correspondingMasterRow.addClass(partiallySelectedRowClassName);
             }
