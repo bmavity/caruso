@@ -5,6 +5,8 @@
   var sortExtension = (function() {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
+        asc = 'asc',
+        desc = 'desc',
         that = {};
 
     that.handles = function($target) {
@@ -16,7 +18,7 @@
           sortItem = $clickedHeader.data(sortDataKey);
 
       if(sortItem) {
-        sortItem.order = sortItem.order === 'asc' ? 'desc' : 'asc';
+        sortItem.order = sortItem.order === asc ? desc : asc;
         this.loadData(sortItem);
       };
     };
@@ -25,7 +27,7 @@
       var field = $th.attr('class');
       $th.data(sortDataKey, {
         field: field,
-        order: 'desc'
+        order: desc
       });
     };
 
