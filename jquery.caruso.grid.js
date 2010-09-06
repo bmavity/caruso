@@ -142,6 +142,9 @@
           selectedRowSelector = 'tr.' + rowSelectedClassName,
           that = {};
 
+      var partiallySelectedRowClassName = 'caruso-partially-selected',
+          partiallySelectedRowSelector = 'tr.' + partiallySelectedRowClassName;
+
       var deselectAll = function() {
         $bodyTable.find(selectedRowSelector).removeClass(rowSelectedClassName);
       };
@@ -155,6 +158,10 @@
             rowIsSelected = $clickedRow.hasClass(rowSelectedClassName),
             $detailRow = $clickedRow.next('tr.caruso-detail-row'),
             rowHasDetails = $detailRow.length !== 0;
+
+        var $clickedDetailRow = $target.closest('tr.caruso-detail-row'),
+            isDetailRow = $clickedDetailRow.length !== 0,
+            $correspondingMasterRow = $clickedDetailRow.prev('tr');
 
         var deselectDetailRows = function() {
           $detailRow.find('tbody tr').removeClass(rowSelectedClassName);
@@ -173,6 +180,11 @@
           $clickedRow.removeClass(rowSelectedClassName);
           if(rowHasDetails) {
             deselectDetailRows();
+          } else if(isDetailRow) {
+            $correspondingMasterRow.removeClass(rowSelectedClassName);
+            if($clickedRow.siblings(selectedRowSelector).length !== 0) {
+              $correspondingMasterRow.addClass(partiallySelectedRowClassName);
+            }
           }
         };
 
@@ -183,6 +195,13 @@
           }
           if(rowHasDetails) {
             selectDetailRows();
+          } else if(isDetailRow) {
+            if($clickedRow.siblings().not(selectedRowSelector).length === 0) {
+              $correspondingMasterRow.removeClass(partiallySelectedRowClassName);
+              $correspondingMasterRow.addClass(rowSelectedClassName);
+            } else {
+              $correspondingMasterRow.addClass(partiallySelectedRowClassName);
+            }
           }
         };
 
