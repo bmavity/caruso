@@ -207,7 +207,14 @@
           $clickedRow.removeClass(partiallySelectedRowClassName);
           $clickedRow.addClass(selectedRowClassName);
           if(config.rowSelectedHandler) {
-            config.rowSelectedHandler($clickedRow.data(rowDataKey));
+            if(isDetailRow) {
+              config.rowSelectedHandler({
+                detail: $clickedRow.data(rowDataKey),
+                master: $correspondingMasterRow.data(rowDataKey)
+              });
+            } else {
+              config.rowSelectedHandler($clickedRow.data(rowDataKey));
+            }
           }
           if(rowHasDetails) {
             selectDetailRows();
