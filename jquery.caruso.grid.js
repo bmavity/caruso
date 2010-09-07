@@ -156,6 +156,41 @@
         }
       };
       
+      that.getSelected = function() {
+        var $selectedRows,
+            $fullySelectedRows,
+            $partiallySelectedRows,
+            results = [];
+        if(config.detail) {
+          $fullySelectedRows = $body.children(selectedRowSelector);
+          $partiallySelectedRows = $body.children(partiallySelectedRowSelector);
+          $fullySelectedRows.each(function() {
+            results.push({
+              master: $(this).data(rowDataKey),
+              details: []
+            });
+          });
+          $partiallySelectedRows.each(function() {
+            var $this = $(this),
+                $detailParentRow = $this.next('tr.caruso-detail-row'),
+                $detailBody = $detailParentRow.find('tbody'),
+                $detailRows = $detailBody.children(selectedRowSelector);
+            results.push({
+              master: $this.data(rowDataKey),
+              details: $.map($detailRows, function(row) {
+                return $(row).data(rowDataKey);
+              })
+            });
+          });
+          return results;
+        } else {
+          $selectedRows = $bodyTable.find(selectedRowSelector);
+          return $.map($selectedRows, function(row) {
+            return $(row).data(rowDataKey);
+          });
+        }
+      };
+      
       that.handles = function($target) {
         return $target.closest('tr').length === 1;
       };
@@ -252,6 +287,7 @@
 
       return that;
     })();
+    that.getSelected = selectClickHandler.getSelected;
 
     var bodyHandlers = [expandClickHandler, sortExtension, selectClickHandler];
 

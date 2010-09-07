@@ -414,10 +414,11 @@
       }
     });
     $('button').click(function() {
+      console.log(g.getSelected());
       g.updateRow({
         key: {
           name: 'customer',
-          val: 'Buck Phillips'
+          val: 'Phillips, Buck'
         },
         data: {
           state: 'VT'
