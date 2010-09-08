@@ -335,7 +335,9 @@
       </table>
     </div>
   </div>
-  <button>Do it</button>
+  <button id="doIt">Do it</button>
+  <button id="selectAll">Select All</button>
+  <button id="deselectAll">Deselect All</button>
   <script type="text/javascript" src="../../jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../jquery.getscrollbarwidth.js"></script>
   <script type="text/javascript" src="../../jquery.caruso.text.js"></script>
@@ -413,7 +415,7 @@
         console.log('deselected: ', rowData);
       }
     });
-    $('button').click(function() {
+    $('#doIt').click(function() {
       console.log(g.getSelected());
       g.updateRow({
         key: {
@@ -424,6 +426,12 @@
           state: 'VT'
         }
       });
+    });
+    $('#selectAll').click(function() {
+      g.selectAll();
+    });
+    $('#deselectAll').click(function() {
+      g.deselectAll();
     });
   })();
   </script>

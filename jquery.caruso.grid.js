@@ -155,6 +155,12 @@
           });
         }
       };
+      that.deselectAll = deselectAll;
+
+      that.selectAll = function() {
+        var $visibleNonDetailRows = $bodyTable.find('tr').not('tr.caruso-detail_row');
+        $visibleNonDetailRows.addClass(selectedRowClassName);
+      };
       
       that.getSelected = function() {
         var $selectedRows,
@@ -287,7 +293,9 @@
 
       return that;
     })();
+    that.deselectAll = selectClickHandler.deselectAll;
     that.getSelected = selectClickHandler.getSelected;
+    that.selectAll = selectClickHandler.selectAll;
 
     var bodyHandlers = [expandClickHandler, sortExtension, selectClickHandler];
 
