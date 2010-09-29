@@ -12,11 +12,11 @@
     }
   };
 
-  $.filterOne = function(arrayLike, filterFn) {
-    return filterOne(arrayLike, filterFn);
+  $.filterOne = function(arrayLike, filterFn, transformFn) {
+    return filterOne(arrayLike, filterFn, transformFn);
   };
 
-  $.fn.filterOne = function(filterFn) {
+  $.fn.filterOne = function(filterFn, transformFn) {
     return filterOne(this, filterFn, function(ele) {
       return $(ele);
     });
@@ -24,12 +24,26 @@
 })(jQuery);
 
 (function($) {
-  var valSetter = {
+  var valHandler = {
         handles: function($element) {
           return true;
         },
+        getValue: function($element) {
+          return $element.val();
+        },
         setValue: function($element, val) {
           $element.val(val || '');
+        }
+      },
+      checkboxGroupHandler = {
+        handles: function($element) {
+            return $element.find(':checkbox').length !== 0;
+        },
+        getValue: function($element) {
+            var checkedCheckboxes = $element.find(':checkbox:checked');
+            return $.map(checkedCheckboxes, function(checkbox) {
+                return $(checkbox).val();
+            });
         }
       },
       htmlSetter = {
@@ -40,21 +54,49 @@
           $element.html(val);
         }
       },
-      setters = [htmlSetter, valSetter];
+      getters = [checkboxGroupHandler, valHandler],
+      setters = [htmlSetter, valHandler];
 
   var findElements = function($element, propertyName) {
-    var findByIdSelector = '#' + $.pascalize(propertyName),
-        findByClassSelector = '.' + $.camelize(propertyName);
-    return $element.find(findByClassSelector);
+    var selectors = [
+      '#' + $.camelize(propertyName),
+      '.' + $.camelize(propertyName),
+      '#' + $.pascalize(propertyName),
+      '.' + $.pascalize(propertyName)
+    ];
+    return $.filterOne(selectors, function($childElement) {
+        return $childElement.length === 1;
+      },
+      function(selector) {
+        return $element.find(selector);
+    });
+  };
+  
+  $.fn.extract = function(obj) {
+    var propertyName,
+        propertyValue,
+        foundElements,
+        getter;
+    
+    for(propertyName in obj) {
+      foundElements = findElements(this, propertyName);
+      if(foundElements) {
+        getter = $.filterOne(getters, function(getterObj) {
+          return getterObj.handles(foundElements);
+        });
+        obj[propertyName] = getter.getValue(foundElements);
+      }
+    }
   };
 
   $.fn.inject = function(obj) {
     var propertyName,
-        foundElements;
+        foundElements
+        setter;
 
     for(propertyName in obj) {
       foundElements = findElements(this, propertyName);
-      if(foundElements.length === 1) {
+      if(foundElements) {
         setter = $.filterOne(setters, function(setterObj) {
           return setterObj.handles(foundElements);
         });
