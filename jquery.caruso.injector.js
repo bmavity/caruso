@@ -91,7 +91,7 @@
 
   $.fn.inject = function(obj) {
     var propertyName,
-        foundElements
+        foundElements,
         setter;
 
     for(propertyName in obj) {
