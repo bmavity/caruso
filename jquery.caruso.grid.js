@@ -157,6 +157,11 @@
       };
       that.deselectAll = deselectAll;
 
+      that.removeSelected = function() {
+          $fullySelectedRows = $body.children(selectedRowSelector);
+          $fullySelectedRows.hide();
+      };
+
       that.selectAll = function() {
         var $visibleNonDetailRows = $bodyTable.find('tr').not('tr.caruso-detail_row');
         $visibleNonDetailRows.addClass(selectedRowClassName);
@@ -295,6 +300,7 @@
     })();
     that.deselectAll = selectClickHandler.deselectAll;
     that.getSelected = selectClickHandler.getSelected;
+    that.removeSelected = selectClickHandler.removeSelected;
     that.selectAll = selectClickHandler.selectAll;
 
     var bodyHandlers = [expandClickHandler, sortExtension, selectClickHandler];

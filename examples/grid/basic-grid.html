@@ -338,6 +338,7 @@
   <button id="doIt">Do it</button>
   <button id="selectAll">Select All</button>
   <button id="deselectAll">Deselect All</button>
+  <button id="removeSelected">Remove Selected</button>
   <script type="text/javascript" src="../../jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../jquery.getscrollbarwidth.js"></script>
   <script type="text/javascript" src="../../jquery.caruso.text.js"></script>
@@ -432,6 +433,9 @@
     });
     $('#deselectAll').click(function() {
       g.deselectAll();
+    });
+    $('#removeSelected').click(function() {
+    	g.removeSelected();
     });
   })();
   </script>
