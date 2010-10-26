@@ -159,7 +159,7 @@
 
       that.removeSelected = function() {
           $fullySelectedRows = $body.children(selectedRowSelector);
-          $fullySelectedRows.hide();
+          $fullySelectedRows.remove();
       };
 
       that.selectAll = function() {
