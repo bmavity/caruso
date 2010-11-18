@@ -1,6 +1,30 @@
 (function($) {
   var rowDataKey = 'caruso.grid.rowData';
 
+  var merge = (function() {
+  	var that = {};
+
+		var transform = function(mergeInto, mergeFrom) {
+			var key,
+					oldFn;
+			for(key in mergeFrom) {
+				if(mergeFrom.hasOwnProperty(key)) {
+					if(mergeInto.hasOwnProperty(key)) {
+						oldFn = mergeInto[key];
+						mergeInto[key] = function(input) {
+							oldFn(mergeFrom[key](input));
+						};
+					} else {
+						mergeInto[key] = mergeFrom[key];
+					}
+				}
+			}
+		};
+
+		that.transform = transform;
+  	return that;
+  })();
+
   var sortExtension = (function() {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
@@ -84,13 +108,14 @@
         $body = $bodyDiv.find('tbody'),
         scrollbarWidth = $.getScrollbarWidth(),
         clickHandlers = [],
+        gridWidth,
   			that = {};
 
 		var appendTo = function($element) {
 			$bodyDiv.appendTo($element);
 		};
-
-    var setColumnWidths = function(gridWidth) {
+		
+    var setColumnWidths = function() {
       if($bodyDiv.height() < $bodyTable.height()) {
         $bodyTable.width(gridWidth - scrollbarWidth);
         $body.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
@@ -106,7 +131,12 @@
         $p.append($row);
       });
       $body.empty().append($p.children());
+      setColumnWidths();
     };
+
+		var setGridWidth = function(width) {
+			gridWidth = width;
+		};
 
     var setHandlers = function(handlers) {
     	clickHandlers = handlers;
@@ -125,8 +155,8 @@
 		});
 
   	that.appendTo = appendTo;
-  	that.setColumnWidths = setColumnWidths;
   	that.setData = setData;
+  	that.setGridWidth = setGridWidth;
   	that.setHandlers = setHandlers;
   	that.setHeight = setHeight;
   	return that;
@@ -179,20 +209,13 @@
     var $grid = config.$placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
         that = {};
 
-		if(config.rowDataTransformer) {
-			var oldSetData = body.setData;
-			body.setData = function(data) {
-				oldSetData($.map(data, config.rowDataTransformer));
-				body.setColumnWidths($grid.width());
-			}
-		}
-
     $grid.height(config.dimensions.height);
     $grid.width(config.dimensions.width);
 		head.appendTo($grid);
 		body.appendTo($grid);
     config.$placeholder.replaceWith($grid);
     body.setHeight($grid.height() - head.getHeight());
+    body.setGridWidth($grid.width());
     config.dataSource.getData(body.setData);
     
     return that;
@@ -237,6 +260,12 @@
         head = createHead(model.$headerRow, tmpConfig, body),
         selectionExtension = createSelectionExtension(body);
     
+		if(config.rowDataTransformer) {
+			merge.transform(body, {
+				setData: function(data) {
+					return $.map(data, config.rowDataTransformer);
+			}});
+		}
     head.setHandlers([ sortExtension ]);
     body.setHandlers([ selectionExtension ]);
     return createGrid(tmpConfig, head, body);
