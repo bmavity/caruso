@@ -1,6 +1,5 @@
 (function($) {
-  var scrollbarWidth = $.getScrollbarWidth(),
-      rowDataKey = 'caruso.grid.rowData';
+  var rowDataKey = 'caruso.grid.rowData';
 
   var sortExtension = (function() {
     var sortDataKey = 'caruso.grid.sortData',
@@ -35,20 +34,22 @@
   })();
 
 
-  var createBody = function($bodyRowTemplate) {
+  var createBody = function($rowTemplate, lastColumnWidth) {
   	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
+        scrollbarWidth = $.getScrollbarWidth(),
+        handlers = [],
   			that = {};
 
 		var appendTo = function($element) {
 			$bodyDiv.appendTo($element);
 		};
 
-    var setColumnWidths = function(gridWidth, lastColumnWidth) {
+    var setColumnWidths = function(gridWidth) {
       if($bodyDiv.height() < $bodyTable.height()) {
         $bodyTable.width(gridWidth - scrollbarWidth);
-        $grid.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
+        $body.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
       }
     };
 
@@ -56,7 +57,7 @@
       var $p = $('<div />');
     
       $.each(data, function() {
-        var $row = $bodyRowTemplate.clone().inject(this);
+        var $row = $rowTemplate.clone().inject(this);
         $row.data(rowDataKey, this);
         $p.append($row);
       });
@@ -66,6 +67,10 @@
     var setHeight = function(height) {
     	$bodyDiv.height(height);
     };
+
+		$bodyDiv.click(function(evt) {
+			
+		});
 
   	that.appendTo = appendTo;
   	that.setColumnWidths = setColumnWidths;
@@ -78,7 +83,6 @@
     var $grid = config.$placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
         $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
-        lastColumnWidth = config.$placeholder.find('th:last-child').width(),
         firstColumnWidth = config.$placeholder.find('th:first-child').width(),
         that = {};
 
@@ -88,7 +92,7 @@
     $grid.append($headerDiv);
 
 
-		body.setColumnWidths($grid.width(), lastColumnWidth);
+		body.setColumnWidths($grid.width());
 		if(config.rowDataTransformer) {
 			var oldSetData = body.setData;
 			body.setData = function(data) {
@@ -242,7 +246,7 @@
           height: this.height(),
           width: this.width()
         },
-        body = createBody(model.$dataRow),
+        body = createBody(model.$dataRow, this.find('th:last-child').width()),
         grid = createGrid({
           dataSource: config.dataSource,
           dimensions: dimensions,
