@@ -132,37 +132,25 @@
   	return that;
   };
 
-  var createGrid = function(config, body) {
-    var $grid = config.$placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
-        $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
+	var createHead = function($headerRow, config, body) {
+  	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
-        firstColumnWidth = config.$placeholder.find('th:first-child').width(),
-        that = {};
+        clickHandlers = [],
+				that = {};
 
-    $grid.height(config.dimensions.height);
-    $grid.width(config.dimensions.width);
-    $head.append(config.model.$headerRow);
-    $grid.append($headerDiv);
+		$head.append($headerRow);
 
+		var appendTo = function($element) {
+			$headerDiv.appendTo($element);
+		};
 
-		if(config.rowDataTransformer) {
-			var oldSetData = body.setData;
-			body.setData = function(data) {
-				oldSetData($.map(data, config.rowDataTransformer));
-				body.setColumnWidths($grid.width());
-			}
-		}
-    
+		var getHeight = function() {
+			return $headerDiv.height();
+		};
 
-    var bodyHandlers = [sortExtension];
-
-    $head.click(function(evt) {
-      var $target = $(evt.target),
-          matchingHandler = $.filterOne(bodyHandlers, function(handler) {
-            return handler.handles($target);
-          });
-      matchingHandler.handle.call({ loadData: loadData }, $target, evt);
-    });
+		var setHandlers = function(handlers) {
+			clickHandlers = handlers;
+		};
 
     var loadData = function() {
       var args = $.makeArray(arguments),
@@ -173,21 +161,38 @@
       getData.apply(dataSource, args);
     };
 
-    that.updateRow = function(updateParams) {
-      var $rows = $bodyTable.find('tbody > tr'),
-          rowData;
-      var $matchingRow = $rows.filterOne(function($row) {
-        rowData = $row.data(rowDataKey);
-        return rowData[updateParams.key.name] === updateParams.key.val;
-      });
-      $.extend(rowData, updateParams.data);
-      $matchingRow.inject(rowData);
-    };
+    $head.click(function(evt) {
+      var $target = $(evt.target),
+          matchingHandler = $.filterOne(clickHandlers, function(handler) {
+            return handler.handles($target);
+          });
+      matchingHandler.handle.call({ loadData: loadData }, $target, evt);
+    });
+    
+		that.appendTo = appendTo;
+		that.getHeight = getHeight;
+		that.setHandlers = setHandlers;
+		return that;
+	};
 
+  var createGrid = function(config, head, body) {
+    var $grid = config.$placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
+        that = {};
+
+		if(config.rowDataTransformer) {
+			var oldSetData = body.setData;
+			body.setData = function(data) {
+				oldSetData($.map(data, config.rowDataTransformer));
+				body.setColumnWidths($grid.width());
+			}
+		}
+
+    $grid.height(config.dimensions.height);
+    $grid.width(config.dimensions.width);
+		head.appendTo($grid);
 		body.appendTo($grid);
     config.$placeholder.replaceWith($grid);
-    console.log($headerDiv.height());
-    body.setHeight($grid.height() - $headerDiv.height());
+    body.setHeight($grid.height() - head.getHeight());
     config.dataSource.getData(body.setData);
     
     return that;
@@ -229,36 +234,51 @@
           rowDeselectedHandler: config.rowDeselectedHandler,
           rowDataTransformer: config.rowDataTransformer
         },
-        selectHandler = createSelectionExtension(body);
+        head = createHead(model.$headerRow, tmpConfig, body),
+        selectionExtension = createSelectionExtension(body);
     
-    body.setHandlers([ selectHandler ]);
-    return createGrid(tmpConfig, body);
+    head.setHandlers([ sortExtension ]);
+    body.setHandlers([ selectionExtension ]);
+    return createGrid(tmpConfig, head, body);
   };
 })(jQuery);
 
 
-//return $.map($selectedRows, function(row) {
-	//return $(row).data(rowDataKey);
-//});
-//if(config.rowDeselectedHandler) {
-	//$selectedRows.each(function() {
-		//config.rowDeselectedHandler($(this).data(rowDataKey));
-	//});
-//}
-//if(config.rowDeselectedHandler) {
-	//config.rowDeselectedHandler($clickedRow.data(rowDataKey));
-//}
-//if(config.rowSelectedHandler) {
-	//config.rowSelectedHandler($clickedRow.data(rowDataKey));
-//}
+/*
+return $.map($selectedRows, function(row) {
+	return $(row).data(rowDataKey);
+});
+if(config.rowDeselectedHandler) {
+	$selectedRows.each(function() {
+		config.rowDeselectedHandler($(this).data(rowDataKey));
+	});
+}
+if(config.rowDeselectedHandler) {
+	config.rowDeselectedHandler($clickedRow.data(rowDataKey));
+}
+if(config.rowSelectedHandler) {
+	config.rowSelectedHandler($clickedRow.data(rowDataKey));
+}
 
-//if(config.multiSelect) {
-	//if(evt.metaKey) {
-		//toggleSelection();
-	//} else {
-		//if(!rowIsSelected) {
-			//deselectAll();
-			//selectRow();
-		//}
-	//}
-//}
+if(config.multiSelect) {
+	if(evt.metaKey) {
+		toggleSelection();
+	} else {
+		if(!rowIsSelected) {
+			deselectAll();
+			selectRow();
+		}
+	}
+}
+
+that.updateRow = function(updateParams) {
+	var $rows = $bodyTable.find('tbody > tr'),
+			rowData;
+	var $matchingRow = $rows.filterOne(function($row) {
+		rowData = $row.data(rowDataKey);
+		return rowData[updateParams.key.name] === updateParams.key.val;
+	});
+	$.extend(rowData, updateParams.data);
+	$matchingRow.inject(rowData);
+};
+*/
