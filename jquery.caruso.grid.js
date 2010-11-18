@@ -33,13 +33,57 @@
     return that;
   })();
 
+	var createSelectionExtension = function(body) {
+		var selectedRowClassName = 'caruso-grid-selected',
+				selectedRowSelector = 'tr.' + selectedRowClassName,
+				that = {};
+
+		var deselectAll = function() {
+			body.find(selectedRowSelector).removeClass(selectedRowClassName);
+		};
+
+		var removeSelected = function() {
+			body.find(selectedRowSelector).remove();
+		};
+
+		var selectAll = function() {
+			body.find('tr').addClass(selectedRowClassName);
+		};
+		
+		var getSelected = function() {
+			return body.find(selectedRowSelector);
+		};
+		
+		var handles = function($target) {
+			return $target.closest('tr').length === 1;
+		};
+
+		var handle = function($target, evt) {
+			var $clickedRow = $target.closest('tr'),
+					rowIsSelected = $clickedRow.hasClass(selectedRowClassName);
+
+			if(rowIsSelected) {
+				$clickedRow.removeClass(selectedRowClassName);
+			} else {
+				$clickedRow.addClass(selectedRowClassName);
+			}
+		};
+
+		that.deselectAll = deselectAll;
+		that.getSelected = getSelected;
+		that.handles = handles;
+		that.handle = handle;
+		that.removeSelected = removeSelected;
+		that.selectAll = selectAll;
+		return that;
+	};
 
   var createBody = function($rowTemplate, lastColumnWidth) {
   	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
         scrollbarWidth = $.getScrollbarWidth(),
-        handlers = [],
+        clickHandlers = [],
   			that = {};
 
 		var appendTo = function($element) {
@@ -64,17 +108,26 @@
       $body.empty().append($p.children());
     };
 
+    var setHandlers = function(handlers) {
+    	clickHandlers = handlers;
+    };
+
     var setHeight = function(height) {
     	$bodyDiv.height(height);
     };
 
 		$bodyDiv.click(function(evt) {
-			
+      var $target = $(evt.target),
+          matchingHandler = $.filterOne(clickHandlers, function(handler) {
+            return handler.handles($target);
+          });
+      matchingHandler.handle.call({ loadData: function(){} }, $target, evt);
 		});
 
   	that.appendTo = appendTo;
   	that.setColumnWidths = setColumnWidths;
   	that.setData = setData;
+  	that.setHandlers = setHandlers;
   	that.setHeight = setHeight;
   	return that;
   };
@@ -92,99 +145,18 @@
     $grid.append($headerDiv);
 
 
-		body.setColumnWidths($grid.width());
 		if(config.rowDataTransformer) {
 			var oldSetData = body.setData;
 			body.setData = function(data) {
 				oldSetData($.map(data, config.rowDataTransformer));
+				body.setColumnWidths($grid.width());
 			}
 		}
     
-    var selectClickHandler = (function() {
-      var selectedRowClassName = 'caruso-selected',
-          selectedRowSelector = 'tr.' + selectedRowClassName,
-          that = {};
 
-      var deselectAll = function() {
-        $selectedRows = $bodyTable.find(selectedRowSelector);
-        $selectedRows.removeClass(selectedRowClassName);
-        if(config.rowDeselectedHandler) {
-          $selectedRows.each(function() {
-            config.rowDeselectedHandler($(this).data(rowDataKey));
-          });
-        }
-      };
-      that.deselectAll = deselectAll;
+    var bodyHandlers = [sortExtension];
 
-      that.removeSelected = function() {
-				$body.children(selectedRowSelector).remove();
-      };
-
-      that.selectAll = function() {
-        $bodyTable.find('tr').addClass(selectedRowClassName);
-      };
-      
-      that.getSelected = function() {
-        var $selectedRows = $bodyTable.find(selectedRowSelector);
-				return $.map($selectedRows, function(row) {
-					return $(row).data(rowDataKey);
-				});
-      };
-      
-      that.handles = function($target) {
-        return $target.closest('tr').length === 1;
-      };
-
-      that.handle = function($target, evt) {
-        var $clickedRow = $target.closest('tr'),
-            rowIsSelected = $clickedRow.hasClass(selectedRowClassName);
-
-        var deselectRow = function() {
-          $clickedRow.removeClass(selectedRowClassName);
-          if(config.rowDeselectedHandler) {
-            config.rowDeselectedHandler($clickedRow.data(rowDataKey));
-          }
-        };
-
-        var selectRow = function() {
-          $clickedRow.addClass(selectedRowClassName);
-          if(config.rowSelectedHandler) {
-						config.rowSelectedHandler($clickedRow.data(rowDataKey));
-          }
-        };
-
-        var toggleSelection = function() {
-          if(rowIsSelected) {
-            deselectRow();
-          } else {
-            selectRow();
-          }
-        };
-
-        if(config.multiSelect) {
-          if(evt.metaKey) {
-            toggleSelection();
-          } else {
-            if(!rowIsSelected) {
-              deselectAll();
-              selectRow();
-            }
-          }
-        } else {
-          toggleSelection();
-        }
-      };
-
-      return that;
-    })();
-    that.deselectAll = selectClickHandler.deselectAll;
-    that.getSelected = selectClickHandler.getSelected;
-    that.removeSelected = selectClickHandler.removeSelected;
-    that.selectAll = selectClickHandler.selectAll;
-
-    var bodyHandlers = [sortExtension, selectClickHandler];
-
-    $grid.click(function(evt) {
+    $head.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(bodyHandlers, function(handler) {
             return handler.handles($target);
@@ -247,7 +219,7 @@
           width: this.width()
         },
         body = createBody(model.$dataRow, this.find('th:last-child').width()),
-        grid = createGrid({
+        tmpConfig = {
           dataSource: config.dataSource,
           dimensions: dimensions,
           model: model,
@@ -257,8 +229,36 @@
           rowDeselectedHandler: config.rowDeselectedHandler,
           rowDataTransformer: config.rowDataTransformer
         },
-        body
-        );
-    return grid;
+        selectHandler = createSelectionExtension(body);
+    
+    body.setHandlers([ selectHandler ]);
+    return createGrid(tmpConfig, body);
   };
 })(jQuery);
+
+
+//return $.map($selectedRows, function(row) {
+	//return $(row).data(rowDataKey);
+//});
+//if(config.rowDeselectedHandler) {
+	//$selectedRows.each(function() {
+		//config.rowDeselectedHandler($(this).data(rowDataKey));
+	//});
+//}
+//if(config.rowDeselectedHandler) {
+	//config.rowDeselectedHandler($clickedRow.data(rowDataKey));
+//}
+//if(config.rowSelectedHandler) {
+	//config.rowSelectedHandler($clickedRow.data(rowDataKey));
+//}
+
+//if(config.multiSelect) {
+	//if(evt.metaKey) {
+		//toggleSelection();
+	//} else {
+		//if(!rowIsSelected) {
+			//deselectAll();
+			//selectRow();
+		//}
+	//}
+//}
