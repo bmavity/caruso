@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Caruso Grid - Simple Example</title>
+
+  <style type="text/css">
+  	td, th {
+  		padding:0;
+  		text-align:left;
+  	}
+  	#customers {
+  		border:solid 1px red;
+  		height:200px;
+  		width:800px;
+  	}
+			#customers .customer {
+				width:175px;
+			}
+			#customers .city {
+				width:200px;
+			}
+			#customers .company {
+				width:350px;
+			}
+			#customers .state {
+				width:75px;
+			}
+  </style>
+</head>
+<body>
+  <h1>Caruso Grid Dynamic Data Loading</h1>
+
+	<div id="customers">
+    <table>
+      <thead>
+      <tr>
+        <th class="customer">Customer</th>
+        <th class="company">Company</th>
+        <th class="city">City</th>
+        <th class="state">State</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+<tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+<tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+      <tr>
+        <td class="customer">Buck Phillips</td>
+        <td class="company">Steal Your Change Subs</td>
+        <td class="city">Red Bank</td>
+        <td class="state">NJ</td>
+      </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="../../lib/jquery.getscrollbarwidth.js"></script>
+  <script type="text/javascript" src="../../jquery.caruso.text.js"></script>
+  <script type="text/javascript" src="../../jquery.caruso.injector.js"></script>
+  <script type="text/javascript" src="../../jquery.caruso.grid.js"></script>
+  <script type="text/javascript">
+  (function() {
+    var ds = (function() {
+      var that = {},
+          items = [
+            { firstName: 'Auck', lastName: 'Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Buck', lastName: 'Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
+            { firstName: 'Cuck', lastName: 'Phillips', company: 'Gteal Your Change Subs', city: 'Hazlet', state: 'NJ' },
+            { firstName: 'Duck', lastName: 'Phillips', company: 'Fteal Your Change Subs', city: 'Itasca', state: 'IL' },
+            { firstName: 'Euck', lastName: 'Phillips', company: 'Eteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Zuck', lastName: 'Phillips', company: 'Dteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Guck', lastName: 'Phillips', company: 'Cteal Your Change Subs', city: 'Red Bank', state: 'NJ' },
+            { firstName: 'Huck', lastName: 'Phillips', company: 'Bteal Your Change Subs', city: 'Red Bank', state: 'CA' },
+            { firstName: 'Iuck', lastName: 'Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
+          ];
+
+      that.getData = function(sortOptions, callback) {
+        var orderFactor;
+
+        if(!callback) {
+          callback = sortOptions;
+          sortOptions = null;
+        }
+        if(sortOptions) {
+          orderFactor = sortOptions.order === 'asc' ? 1 : -1;
+          items.sort(function(a, b) {
+            if(a[sortOptions.field] > b[sortOptions.field]) return 1 * orderFactor;
+            if(a[sortOptions.field] < b[sortOptions.field]) return -1 * orderFactor;
+            return 0;
+          });
+        }
+        callback(items);
+      };
+
+      return that;
+    })();
+    var g = $('#customers').carusoGrid({
+      dataSource: ds,
+      multiSelect: true,
+      rowDataTransformer: function(dataItem) {
+        return $.extend(dataItem, {
+          customer: dataItem.lastName + ', ' + dataItem.firstName
+        });
+      },
+      rowSelectedHandler: function(rowData) {
+        console.log(rowData);
+      },
+      rowDeselectedHandler: function(rowData) {
+        console.log('deselected: ', rowData);
+      }
+    });
+    $('#doIt').click(function() {
+      console.log(g.getSelected());
+      g.updateRow({
+        key: {
+          name: 'customer',
+          val: 'Phillips, Buck'
+        },
+        data: {
+          state: 'VT'
+        }
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
