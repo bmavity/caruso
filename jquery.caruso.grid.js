@@ -32,11 +32,11 @@
         desc = 'desc',
         that = {};
 
-    that.handles = function($target) {
+    var handles = function($target) {
       return $target.closest(thSelector).length !== 0;
     };
 
-    that.handle = function($target) {
+    var handle = function($target) {
       var $clickedHeader = $target.closest(thSelector),
           sortItem = $clickedHeader.data(sortDataKey);
 
@@ -46,7 +46,7 @@
       };
     };
 
-    that.enrichModel = function($th) {
+    var enrichModel = function($th) {
       var field = $th.attr('class');
       $th.data(sortDataKey, {
         field: field,
@@ -54,6 +54,9 @@
       });
     };
 
+		that.enrichModel = enrichModel;
+		that.handle = handle;
+		that.handles = handles;
     return that;
   })();
 
