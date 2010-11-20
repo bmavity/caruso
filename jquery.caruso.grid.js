@@ -25,7 +25,7 @@
   	return that;
   })();
 
-  var sortExtension = (function() {
+  var createSortExtension = function(head, body, config) {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
         asc = 'asc',
@@ -46,6 +46,15 @@
       };
     };
 
+    var loadData = function() {
+      var args = $.makeArray(arguments),
+          dataSource = config.dataSource,
+          getData = dataSource.getData;
+
+      args.push(body.setData);
+      getData.apply(dataSource, args);
+    };
+
     var enrichModel = function($th) {
       var field = $th.attr('class');
       $th.data(sortDataKey, {
@@ -58,7 +67,7 @@
 		that.handle = handle;
 		that.handles = handles;
     return that;
-  })();
+  };
 
 	var createSelectionExtension = function(body) {
 		var selectedRowClassName = 'caruso-grid-selected',
@@ -154,7 +163,7 @@
           matchingHandler = $.filterOne(clickHandlers, function(handler) {
             return handler.handles($target);
           });
-      matchingHandler.handle.call({ loadData: function(){} }, $target, evt);
+      matchingHandler.handle($target, evt);
 		});
 
   	that.appendTo = appendTo;
@@ -165,7 +174,7 @@
   	return that;
   };
 
-	var createHead = function($headerRow, config, body) {
+	var createHead = function($headerRow) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
         clickHandlers = [],
@@ -185,21 +194,13 @@
 			clickHandlers = handlers;
 		};
 
-    var loadData = function() {
-      var args = $.makeArray(arguments),
-          dataSource = config.dataSource,
-          getData = dataSource.getData;
-
-      args.push(body.setData);
-      getData.apply(dataSource, args);
-    };
 
     $head.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(clickHandlers, function(handler) {
             return handler.handles($target);
           });
-      matchingHandler.handle.call({ loadData: loadData }, $target, evt);
+      matchingHandler.handle($target, evt);
     });
     
 		that.appendTo = appendTo;
@@ -208,15 +209,15 @@
 		return that;
 	};
 
-  var createGrid = function(config, head, body) {
-    var $grid = config.$placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
+  var createGrid = function(config, $placeholder, head, body) {
+    var $grid = $placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
         that = {};
 
-    $grid.height(config.dimensions.height);
-    $grid.width(config.dimensions.width);
+    $grid.height($placeholder.height());
+    $grid.width($placeholder.width());
 		head.appendTo($grid);
 		body.appendTo($grid);
-    config.$placeholder.replaceWith($grid);
+    $placeholder.replaceWith($grid);
     body.setHeight($grid.height() - head.getHeight());
     body.setGridWidth($grid.width());
     config.dataSource.getData(body.setData);
@@ -228,10 +229,6 @@
     var $headerRowTemplate = $template.find('table thead tr:first-child').clone(),
         $dataRowTemplate = $template.find('table tbody tr:first-child').clone();
 
-    $headerRowTemplate.children().each(function() {
-      var $this = $(this);
-      sortExtension.enrichModel($this);
-    });
 
     $dataRowTemplate.children().each(function(){
       $(this).html('');
@@ -245,23 +242,17 @@
 
   $.fn.carusoGrid = function carusoGrid(config) {
     var model = createModel(this),
-        dimensions = {
-          height: this.height(),
-          width: this.width()
-        },
+        head = createHead(model.$headerRow),
         body = createBody(model.$dataRow, this.find('th:last-child').width()),
         tmpConfig = {
           dataSource: config.dataSource,
-          dimensions: dimensions,
-          model: model,
           multiSelect: config.multiSelect,
-          $placeholder: this,
           rowSelectedHandler: config.rowSelectedHandler,
           rowDeselectedHandler: config.rowDeselectedHandler,
           rowDataTransformer: config.rowDataTransformer
         },
-        head = createHead(model.$headerRow, tmpConfig, body),
-        selectionExtension = createSelectionExtension(body);
+        selectionExtension = createSelectionExtension(body),
+        sortExtension = createSortExtension(head, body, tmpConfig);
     
 		if(config.rowDataTransformer) {
 			merge.transform(body, {
@@ -271,7 +262,7 @@
 		}
     head.setHandlers([ sortExtension ]);
     body.setHandlers([ selectionExtension ]);
-    return createGrid(tmpConfig, head, body);
+    return createGrid(tmpConfig, $(this[0]), head, body);
   };
 })(jQuery);
 
