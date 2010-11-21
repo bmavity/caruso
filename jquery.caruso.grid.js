@@ -173,13 +173,13 @@
   	return that;
   };
 
-	var createHead = function($headerRow) {
+	var createHead = function(rowFactory) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
         clickHandlers = [],
 				that = {};
 
-		$head.append($headerRow);
+		$head.append(rowFactory.createRow());
 
 		var appendTo = function($element) {
 			$headerDiv.appendTo($element);
@@ -222,12 +222,16 @@
     return that;
   };
   
-  var createModel = function($template) {
-    var $headerRowTemplate = $template.find('table thead tr:first-child').clone();
+  var createHeadRowFactory = function($placeholder) {
+    var $rowTemplate = $placeholder.find('table thead tr:first-child').clone(),
+    		that = {};
 
-    return {
-      $headerRow: $headerRowTemplate,
+    var createRow = function(data) {
+    	return $rowTemplate.clone();
     };
+
+		that.createRow = createRow;
+    return that;
   };
 
 	var createBodyRowFactory = function($placeholder) {
@@ -245,10 +249,10 @@
 	};
 
   $.fn.carusoGrid = function carusoGrid(config) {
-    var model = createModel(this),
-    		$placeholder = $(this[0]),
+    var $placeholder = $(this[0]),
+    		headRowFactory = createHeadRowFactory($placeholder),
+        head = createHead(headRowFactory),
     		bodyRowFactory = createBodyRowFactory($placeholder),
-        head = createHead(model.$headerRow),
         body = createBody(bodyRowFactory, config.dataSource, this.find('th:last-child').width()),
         tmpConfig = {
           multiSelect: config.multiSelect,
