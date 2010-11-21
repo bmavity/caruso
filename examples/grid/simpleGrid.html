@@ -113,6 +113,7 @@
   (function() {
     var ds = (function() {
       var that = {},
+      		dataReceivedCallback,
           items = [
             { firstName: 'Auck', lastName: 'Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
             { firstName: 'Buck', lastName: 'Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
@@ -125,13 +126,9 @@
             { firstName: 'Iuck', lastName: 'Phillips', company: 'Ateal Your Change Subs', city: 'Red Bank', state: 'NJ' }
           ];
 
-      that.getData = function(sortOptions, callback) {
+      var sortData = function(sortOptions) {
         var orderFactor;
 
-        if(!callback) {
-          callback = sortOptions;
-          sortOptions = null;
-        }
         if(sortOptions) {
           orderFactor = sortOptions.order === 'asc' ? 1 : -1;
           items.sort(function(a, b) {
@@ -140,9 +137,15 @@
             return 0;
           });
         }
-        callback(items);
+        dataReceivedCallback(items);
       };
 
+      var onDataReceived = function(callback) {
+      	dataReceivedCallback = callback;
+      };
+
+			that.onDataReceived = onDataReceived;
+			that.sortData = sortData;
       return that;
     })();
     var g = $('#customers').carusoGrid({
@@ -160,6 +163,7 @@
         console.log('deselected: ', rowData);
       }
     });
+    ds.sortData();
     $('#doIt').click(function() {
       console.log(g.getSelected());
       g.updateRow({

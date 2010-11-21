@@ -12,7 +12,7 @@
 					if(mergeInto.hasOwnProperty(key)) {
 						oldFn = mergeInto[key];
 						mergeInto[key] = function(input) {
-							oldFn(mergeFrom[key](input));
+							return oldFn(mergeFrom[key](input));
 						};
 					} else {
 						mergeInto[key] = mergeFrom[key];
@@ -25,7 +25,7 @@
   	return that;
   })();
 
-  var createSortExtension = function(head, body, config) {
+  var createSortExtension = function(head, body, dataSource) {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
         asc = 'asc',
@@ -42,17 +42,8 @@
 
       if(sortItem) {
         sortItem.order = sortItem.order === asc ? desc : asc;
-        this.loadData(sortItem);
+        dataSource.sortData(sortItem);
       };
-    };
-
-    var loadData = function() {
-      var args = $.makeArray(arguments),
-          dataSource = config.dataSource,
-          getData = dataSource.getData;
-
-      args.push(body.setData);
-      getData.apply(dataSource, args);
     };
 
     var enrichModel = function($th) {
@@ -114,17 +105,32 @@
 		return that;
 	};
 
-  var createBody = function($rowTemplate, lastColumnWidth) {
+  var createBody = function(rowFactory, dataSource, lastColumnWidth) {
   	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
         scrollbarWidth = $.getScrollbarWidth(),
         clickHandlers = [],
         gridWidth,
+        $dummyParent,
   			that = {};
+
+		var addRow = function(rowData) {
+			$dummyParent.append(rowFactory.createRow(rowData));
+		};
 
 		var appendTo = function($element) {
 			$bodyDiv.appendTo($element);
+		};
+
+		var beginBatch = function() {
+			$dummyParent = $('<div />');
+		};
+
+		var endBatch = function() {
+			$body.empty().append($dummyParent.children());
+			$dummyParent = null;
+			setColumnWidths();
 		};
 		
     var setColumnWidths = function() {
@@ -132,18 +138,6 @@
         $bodyTable.width(gridWidth - scrollbarWidth);
         $body.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
       }
-    };
-
-    var setData = function(data) {
-      var $p = $('<div />');
-    
-      $.each(data, function() {
-        var $row = $rowTemplate.clone().inject(this);
-        $row.data(rowDataKey, this);
-        $p.append($row);
-      });
-      $body.empty().append($p.children());
-      setColumnWidths();
     };
 
 		var setGridWidth = function(width) {
@@ -166,8 +160,13 @@
       matchingHandler.handle($target, evt);
 		});
 
+		dataSource.onDataReceived(function(data) {
+    	beginBatch();
+    	data.forEach(addRow);
+    	endBatch();
+		});
+
   	that.appendTo = appendTo;
-  	that.setData = setData;
   	that.setGridWidth = setGridWidth;
   	that.setHandlers = setHandlers;
   	that.setHeight = setHeight;
@@ -194,7 +193,6 @@
 			clickHandlers = handlers;
 		};
 
-
     $head.click(function(evt) {
       var $target = $(evt.target),
           matchingHandler = $.filterOne(clickHandlers, function(handler) {
@@ -220,49 +218,52 @@
     $placeholder.replaceWith($grid);
     body.setHeight($grid.height() - head.getHeight());
     body.setGridWidth($grid.width());
-    config.dataSource.getData(body.setData);
     
     return that;
   };
   
   var createModel = function($template) {
-    var $headerRowTemplate = $template.find('table thead tr:first-child').clone(),
-        $dataRowTemplate = $template.find('table tbody tr:first-child').clone();
-
-
-    $dataRowTemplate.children().each(function(){
-      $(this).html('');
-    });
+    var $headerRowTemplate = $template.find('table thead tr:first-child').clone();
 
     return {
       $headerRow: $headerRowTemplate,
-      $dataRow: $dataRowTemplate
     };
   };
 
+	var createBodyRowFactory = function($placeholder) {
+		var $rowTemplate = $placeholder.find('table tbody tr:first-child').clone(),
+				that = {};
+			
+		$rowTemplate.children().empty();
+
+		var createRow = function(data) {
+			return $rowTemplate.clone().inject(data);
+		};
+
+		that.createRow = createRow;
+		return that;
+	};
+
   $.fn.carusoGrid = function carusoGrid(config) {
     var model = createModel(this),
+    		$placeholder = $(this[0]),
+    		bodyRowFactory = createBodyRowFactory($placeholder),
         head = createHead(model.$headerRow),
-        body = createBody(model.$dataRow, this.find('th:last-child').width()),
+        body = createBody(bodyRowFactory, config.dataSource, this.find('th:last-child').width()),
         tmpConfig = {
-          dataSource: config.dataSource,
           multiSelect: config.multiSelect,
           rowSelectedHandler: config.rowSelectedHandler,
           rowDeselectedHandler: config.rowDeselectedHandler,
-          rowDataTransformer: config.rowDataTransformer
         },
         selectionExtension = createSelectionExtension(body),
         sortExtension = createSortExtension(head, body, tmpConfig);
     
 		if(config.rowDataTransformer) {
-			merge.transform(body, {
-				setData: function(data) {
-					return $.map(data, config.rowDataTransformer);
-			}});
+			merge.transform(bodyRowFactory, { createRow: config.rowDataTransformer });
 		}
     head.setHandlers([ sortExtension ]);
     body.setHandlers([ selectionExtension ]);
-    return createGrid(tmpConfig, $(this[0]), head, body);
+    return createGrid(tmpConfig, $placeholder, head, body);
   };
 })(jQuery);
 
