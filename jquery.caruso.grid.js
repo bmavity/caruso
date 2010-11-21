@@ -4,6 +4,23 @@
   var merge = (function() {
   	var that = {};
 
+		var mutate = function(mergeInto, mergeFrom) {
+			var key,
+					oldFn;
+			for(key in mergeFrom) {
+				if(mergeFrom.hasOwnProperty(key)) {
+					if(mergeInto.hasOwnProperty(key)) {
+						oldFn = mergeInto[key];
+						mergeInto[key] = function(input) {
+							return mergeFrom[key](oldFn(input));
+						}
+					} else {
+						mergeInto[key] = mergeFrom[key];
+					}
+				}
+			}
+		};
+
 		var transform = function(mergeInto, mergeFrom) {
 			var key,
 					oldFn;
@@ -21,16 +38,29 @@
 			}
 		};
 
+		that.mutate = mutate;
 		that.transform = transform;
   	return that;
   })();
 
-  var createSortExtension = function(head, body, dataSource) {
+  var createSortExtension = function(head, body, dataSource, headRowFactory) {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
         asc = 'asc',
         desc = 'desc',
         that = {};
+
+    var addSortData = function($row) {
+    	$row.children().each(function() {
+				var $th = $(this),
+						field = $th.attr('class');
+				$th.data(sortDataKey, {
+					field: field,
+					order: desc
+				});
+			});
+			return $row;
+    };
 
     var handles = function($target) {
       return $target.closest(thSelector).length !== 0;
@@ -46,15 +76,8 @@
       };
     };
 
-    var enrichModel = function($th) {
-      var field = $th.attr('class');
-      $th.data(sortDataKey, {
-        field: field,
-        order: desc
-      });
-    };
+		merge.mutate(headRowFactory, { createRow: addSortData });
 
-		that.enrichModel = enrichModel;
 		that.handle = handle;
 		that.handles = handles;
     return that;
@@ -181,6 +204,10 @@
 
 		$head.append(rowFactory.createRow());
 
+		var addHeaderRow = function() {
+			$head.empty().append(rowFactory.createRow());
+		};
+
 		var appendTo = function($element) {
 			$headerDiv.appendTo($element);
 		};
@@ -201,6 +228,7 @@
       matchingHandler.handle($target, evt);
     });
     
+		that.addHeaderRow = addHeaderRow;
 		that.appendTo = appendTo;
 		that.getHeight = getHeight;
 		that.setHandlers = setHandlers;
@@ -218,6 +246,8 @@
     $placeholder.replaceWith($grid);
     body.setHeight($grid.height() - head.getHeight());
     body.setGridWidth($grid.width());
+    //hack: figure out where to really put this
+    head.addHeaderRow();
     
     return that;
   };
@@ -260,13 +290,15 @@
           rowDeselectedHandler: config.rowDeselectedHandler,
         },
         selectionExtension = createSelectionExtension(body),
-        sortExtension = createSortExtension(head, body, tmpConfig);
+        sortExtension = createSortExtension(head, body, config.dataSource, headRowFactory);
     
 		if(config.rowDataTransformer) {
 			merge.transform(bodyRowFactory, { createRow: config.rowDataTransformer });
 		}
+		
     head.setHandlers([ sortExtension ]);
     body.setHandlers([ selectionExtension ]);
+
     return createGrid(tmpConfig, $placeholder, head, body);
   };
 })(jQuery);
