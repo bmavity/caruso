@@ -1,6 +1,4 @@
 (function($) {
-  var rowDataKey = 'caruso.grid.rowData';
-
   var merge = (function() {
   	var that = {};
 
@@ -43,6 +41,20 @@
   	return that;
   })();
 
+	var createBodyRowDataExtension = function(bodyRowFactory) {
+		var rowDataKey = 'caruso.grid.rowData',
+				that = {};
+
+		var addRowData = function(rowData) {
+			rowData.$row.data(rowDataKey, rowData);
+			return rowData;
+		};
+
+		merge.mutate(bodyRowFactory, { createRow: addRowData });
+
+		return that;
+	};
+
   var createSortExtension = function(head, body, dataSource, headRowFactory) {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
@@ -50,8 +62,8 @@
         desc = 'desc',
         that = {};
 
-    var addSortData = function($row) {
-    	$row.children().each(function() {
+    var addSortData = function(rowData) {
+    	rowData.$row.children().each(function() {
 				var $th = $(this),
 						field = $th.attr('class');
 				$th.data(sortDataKey, {
@@ -59,7 +71,7 @@
 					order: desc
 				});
 			});
-			return $row;
+			return rowData;
     };
 
     var handles = function($target) {
@@ -138,8 +150,9 @@
         $dummyParent,
   			that = {};
 
-		var addRow = function(rowData) {
-			$dummyParent.append(rowFactory.createRow(rowData));
+		var addRow = function(data) {
+			var rowData = rowFactory.createRow({ data: data });
+			$dummyParent.append(rowData.$row);
 		};
 
 		var appendTo = function($element) {
@@ -151,6 +164,7 @@
 		};
 
 		var endBatch = function() {
+		console.log($dummyParent.children());
 			$body.empty().append($dummyParent.children());
 			$dummyParent = null;
 			setColumnWidths();
@@ -205,7 +219,8 @@
 		$head.append(rowFactory.createRow());
 
 		var addHeaderRow = function() {
-			$head.empty().append(rowFactory.createRow());
+			var rowData = rowFactory.createRow();
+			$head.empty().append(rowData.$row);
 		};
 
 		var appendTo = function($element) {
@@ -244,10 +259,10 @@
 		head.appendTo($grid);
 		body.appendTo($grid);
     $placeholder.replaceWith($grid);
-    body.setHeight($grid.height() - head.getHeight());
-    body.setGridWidth($grid.width());
     //hack: figure out where to really put this
     head.addHeaderRow();
+    body.setHeight($grid.height() - head.getHeight());
+    body.setGridWidth($grid.width());
     
     return that;
   };
@@ -257,7 +272,9 @@
     		that = {};
 
     var createRow = function(data) {
-    	return $rowTemplate.clone();
+    	return {
+    		$row: $rowTemplate.clone()
+			};
     };
 
 		that.createRow = createRow;
@@ -270,8 +287,9 @@
 			
 		$rowTemplate.children().empty();
 
-		var createRow = function(data) {
-			return $rowTemplate.clone().inject(data);
+		var createRow = function(rowData) {
+			rowData.$row = $rowTemplate.clone().inject(rowData.data);
+			return rowData;
 		};
 
 		that.createRow = createRow;
@@ -290,8 +308,9 @@
           rowDeselectedHandler: config.rowDeselectedHandler,
         },
         selectionExtension = createSelectionExtension(body),
-        sortExtension = createSortExtension(head, body, config.dataSource, headRowFactory);
-    
+        sortExtension = createSortExtension(head, body, config.dataSource, headRowFactory),
+    		bodyDataExtension = createBodyRowDataExtension(bodyRowFactory);
+
 		if(config.rowDataTransformer) {
 			merge.transform(bodyRowFactory, { createRow: config.rowDataTransformer });
 		}

@@ -151,10 +151,13 @@
     var g = $('#customers').carusoGrid({
       dataSource: ds,
       multiSelect: true,
-      rowDataTransformer: function(dataItem) {
-        return $.extend(dataItem, {
+      rowDataTransformer: function(rowData) {
+      	var dataItem = rowData.data;
+      	rowData.originalData = dataItem;
+        rowData.data = $.extend(dataItem, {
           customer: dataItem.lastName + ', ' + dataItem.firstName
         });
+        return rowData;
       },
       rowSelectedHandler: function(rowData) {
         console.log(rowData);
