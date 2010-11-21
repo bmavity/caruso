@@ -164,7 +164,6 @@
 		};
 
 		var endBatch = function() {
-		console.log($dummyParent.children());
 			$body.empty().append($dummyParent.children());
 			$dummyParent = null;
 			setColumnWidths();
@@ -250,7 +249,7 @@
 		return that;
 	};
 
-  var createGrid = function(config, $placeholder, head, body) {
+  var createGrid = function($placeholder, head, body) {
     var $grid = $placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
         that = {};
 
@@ -302,11 +301,6 @@
         head = createHead(headRowFactory),
     		bodyRowFactory = createBodyRowFactory($placeholder),
         body = createBody(bodyRowFactory, config.dataSource, this.find('th:last-child').width()),
-        tmpConfig = {
-          multiSelect: config.multiSelect,
-          rowSelectedHandler: config.rowSelectedHandler,
-          rowDeselectedHandler: config.rowDeselectedHandler,
-        },
         selectionExtension = createSelectionExtension(body),
         sortExtension = createSortExtension(head, body, config.dataSource, headRowFactory),
     		bodyDataExtension = createBodyRowDataExtension(bodyRowFactory);
@@ -318,7 +312,7 @@
     head.setHandlers([ sortExtension ]);
     body.setHandlers([ selectionExtension ]);
 
-    return createGrid(tmpConfig, $placeholder, head, body);
+    return createGrid($placeholder, head, body);
   };
 })(jQuery);
 
