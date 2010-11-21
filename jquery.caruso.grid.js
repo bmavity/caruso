@@ -215,19 +215,9 @@
         clickHandlers = [],
 				that = {};
 
-		$head.append(rowFactory.createRow());
-
 		var addHeaderRow = function() {
 			var rowData = rowFactory.createRow();
 			$head.empty().append(rowData.$row);
-		};
-
-		var appendTo = function($element) {
-			$headerDiv.appendTo($element);
-		};
-
-		var getHeight = function() {
-			return $headerDiv.height();
 		};
 
 		var setHandlers = function(handlers) {
@@ -242,9 +232,8 @@
       matchingHandler.handle($target, evt);
     });
     
+    that.$ele = $headerDiv;
 		that.addHeaderRow = addHeaderRow;
-		that.appendTo = appendTo;
-		that.getHeight = getHeight;
 		that.setHandlers = setHandlers;
 		return that;
 	};
@@ -255,12 +244,12 @@
 
     $grid.height($placeholder.height());
     $grid.width($placeholder.width());
-		head.appendTo($grid);
+		$grid.append(head.$ele);
 		body.appendTo($grid);
-    $placeholder.replaceWith($grid);
     //hack: figure out where to really put this
     head.addHeaderRow();
-    body.setHeight($grid.height() - head.getHeight());
+    $placeholder.replaceWith($grid);
+    body.setHeight($grid.height() - head.$ele.height());
     body.setGridWidth($grid.width());
     
     return that;
