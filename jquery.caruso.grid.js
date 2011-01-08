@@ -140,75 +140,6 @@
 		return that;
 	};
 
-  var createBody = function(rowFactory, dataSource, lastColumnWidth) {
-  	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
-        $bodyTable = $bodyDiv.find('table'),
-        $body = $bodyDiv.find('tbody'),
-        scrollbarWidth = $.getScrollbarWidth(),
-        clickHandlers = [],
-        gridWidth,
-        $dummyParent,
-  			that = {};
-
-		var addRow = function(data) {
-			var rowData = rowFactory.createRow({ data: data });
-			$dummyParent.append(rowData.$row);
-		};
-
-		var appendTo = function($element) {
-			$bodyDiv.appendTo($element);
-		};
-
-		var beginBatch = function() {
-			$dummyParent = $('<div />');
-		};
-
-		var endBatch = function() {
-			$body.empty().append($dummyParent.children());
-			$dummyParent = null;
-			setColumnWidths();
-		};
-		
-    var setColumnWidths = function() {
-      if($bodyDiv.height() < $bodyTable.height()) {
-        $bodyTable.width(gridWidth - scrollbarWidth);
-        $body.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
-      }
-    };
-
-		var setGridWidth = function(width) {
-			gridWidth = width;
-		};
-
-    var setHandlers = function(handlers) {
-    	clickHandlers = handlers;
-    };
-
-    var setHeight = function(height) {
-    	$bodyDiv.height(height);
-    };
-
-		$bodyDiv.click(function(evt) {
-      var $target = $(evt.target),
-          matchingHandler = $.filterOne(clickHandlers, function(handler) {
-            return handler.handles($target);
-          });
-      matchingHandler.handle($target, evt);
-		});
-
-		dataSource.onDataReceived(function(data) {
-    	beginBatch();
-    	data.forEach(addRow);
-    	endBatch();
-		});
-
-  	that.appendTo = appendTo;
-  	that.setGridWidth = setGridWidth;
-  	that.setHandlers = setHandlers;
-  	that.setHeight = setHeight;
-  	return that;
-  };
-
 	var createHead = function(rowFactory) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
@@ -238,6 +169,66 @@
 		return that;
 	};
 
+  var createBody = function(rowFactory, dataSource, lastColumnWidth) {
+  	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
+        $bodyTable = $bodyDiv.find('table'),
+        $body = $bodyDiv.find('tbody'),
+        scrollbarWidth = $.getScrollbarWidth(),
+        clickHandlers = [],
+        gridWidth,
+        $dummyParent,
+  			that = {};
+
+		var addRow = function(data) {
+			var rowData = rowFactory.createRow({ data: data });
+			$dummyParent.append(rowData.$row);
+		};
+
+		var beginBatch = function() {
+			$dummyParent = $('<div />');
+		};
+
+		var endBatch = function() {
+			$body.empty().append($dummyParent.children());
+			$dummyParent = null;
+			setColumnWidths();
+		};
+		
+    var setColumnWidths = function() {
+      if($bodyDiv.height() < $bodyTable.height()) {
+        $bodyTable.width(gridWidth - scrollbarWidth);
+        $body.find('td:last-child').width(lastColumnWidth - scrollbarWidth);
+      }
+    };
+
+		var setGridWidth = function(width) {
+			gridWidth = width;
+		};
+
+    var setHandlers = function(handlers) {
+    	clickHandlers = handlers;
+    };
+
+		$bodyDiv.click(function(evt) {
+      var $target = $(evt.target),
+          matchingHandler = $.filterOne(clickHandlers, function(handler) {
+            return handler.handles($target);
+          });
+      matchingHandler.handle($target, evt);
+		});
+
+		dataSource.onDataReceived(function(data) {
+    	beginBatch();
+    	data.forEach(addRow);
+    	endBatch();
+		});
+
+  	that.$ele = $bodyDiv;
+  	that.setGridWidth = setGridWidth;
+  	that.setHandlers = setHandlers;
+  	return that;
+  };
+
   var createGrid = function($placeholder, head, body) {
     var $grid = $placeholder.clone().empty().addClass('caruso-grid').css({ overflow: 'hidden' }),
         that = {};
@@ -245,11 +236,11 @@
     $grid.height($placeholder.height());
     $grid.width($placeholder.width());
 		$grid.append(head.$ele);
-		body.appendTo($grid);
+		$grid.append(body.$ele);
     //hack: figure out where to really put this
     head.addHeaderRow();
     $placeholder.replaceWith($grid);
-    body.setHeight($grid.height() - head.$ele.height());
+    body.$ele.height($grid.height() - head.$ele.height());
     body.setGridWidth($grid.width());
     
     return that;
