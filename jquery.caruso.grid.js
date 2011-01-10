@@ -143,14 +143,19 @@
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
         clickHandlers = [],
+        namedMutators = {},
 				that = {};
 
 		var addHeaderRow = function(data) {
 			var rowData = { data: data };
 			rowDataMutators.forEach(function(mutatorName) {
-				headRowDataMutators[mutatorName].mutateRowData(rowData);
+				namedMutators[mutatorName].mutateRowData(rowData);
 			});
 			$head.empty().append(rowData.$row);
+		};
+
+		var addMutator = function(name, mutator) {
+			namedMutators[name] = mutator;
 		};
 
 		var setHandlers = function(handlers) {
@@ -167,6 +172,7 @@
     
     that.$ele = $headerDiv;
 		that.addHeaderRow = addHeaderRow;
+		that.addMutator = addMutator;
 		that.setHandlers = setHandlers;
 		return that;
 	};
@@ -293,8 +299,8 @@
         selectionExtension = createSelectionExtension(body),
         sortExtension = createSortExtension(head, body, config.dataSource);
 
-		headRowDataMutators['defaultFactory'] = createHeadRowFactory($placeholder);
-		headRowDataMutators['addSortData'] = sortExtension;
+		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
+		head.addMutator('addSortData', sortExtension);
 
 		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		body.addMutator('addBodyRowData', createBodyRowDataExtension());
