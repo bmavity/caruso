@@ -41,8 +41,6 @@
   	return that;
   })();
 
-  var headRowDataMutators = {};
-
 	var createBodyRowDataExtension = function() {
 		var rowDataKey = 'caruso.grid.rowData',
 				that = {};
@@ -85,7 +83,7 @@
       if(sortItem) {
         sortItem.order = sortItem.order === asc ? desc : asc;
         dataSource.sortData(sortItem);
-      };
+      }
     };
 
 		that.handle = handle;
