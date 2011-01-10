@@ -56,7 +56,7 @@
 		return that;
 	};
 
-  var createSortExtension = function(head, body, dataSource, headRowFactory) {
+  var createSortExtension = function(head, body, dataSource) {
     var sortDataKey = 'caruso.grid.sortData',
         thSelector = '.caruso-grid-head tr th',
         asc = 'asc',
@@ -89,10 +89,9 @@
       };
     };
 
-		merge.mutate(headRowFactory, { createRow: addSortData });
-
 		that.handle = handle;
 		that.handles = handles;
+		that.mutateRowData = addSortData;
     return that;
   };
 
@@ -141,14 +140,17 @@
 		return that;
 	};
 
-	var createHead = function(rowFactory) {
+	var createHead = function(rowDataMutators) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
         clickHandlers = [],
 				that = {};
 
-		var addHeaderRow = function() {
-			var rowData = rowFactory.createRow();
+		var addHeaderRow = function(data) {
+			var rowData = { data: data };
+			rowDataMutators.forEach(function(mutatorName) {
+				headRowDataMutators[mutatorName].mutateRowData(rowData);
+			});
 			$head.empty().append(rowData.$row);
 		};
 
@@ -254,13 +256,11 @@
     var $rowTemplate = $placeholder.find('table thead tr:first-child').clone(),
     		that = {};
 
-    var createRow = function(data) {
-    	return {
-    		$row: $rowTemplate.clone()
-			};
+    var createRow = function(rowData) {
+    		rowData.$row = $rowTemplate.clone()
     };
 
-		that.createRow = createRow;
+		that.mutateRowData = createRow;
     return that;
   };
 
@@ -281,12 +281,15 @@
 
   $.fn.carusoGrid = function carusoGrid(config) {
     var $placeholder = $(this[0]),
-    		headRowFactory = createHeadRowFactory($placeholder),
-        head = createHead(headRowFactory),
+    		headRowMutators = config.headRowMutators || ['defaultFactory', 'addSortData']
+        head = createHead(headRowMutators),
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
         body = createBody(bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
         selectionExtension = createSelectionExtension(body),
-        sortExtension = createSortExtension(head, body, config.dataSource, headRowFactory);
+        sortExtension = createSortExtension(head, body, config.dataSource);
+
+		headRowDataMutators['defaultFactory'] = createHeadRowFactory($placeholder);
+		headRowDataMutators['addSortData'] = sortExtension;
 
 		bodyRowDataMutators['defaultFactory'] = createBodyRowFactory($placeholder);
 		bodyRowDataMutators['addBodyRowData'] = createBodyRowDataExtension();
