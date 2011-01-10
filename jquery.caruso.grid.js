@@ -41,8 +41,7 @@
   	return that;
   })();
 
-  var headRowDataMutators = {},
-  		bodyRowDataMutators = {};
+  var headRowDataMutators = {};
 
 	var createBodyRowDataExtension = function() {
 		var rowDataKey = 'caruso.grid.rowData',
@@ -180,12 +179,17 @@
         clickHandlers = [],
         gridWidth,
         $dummyParent,
+        namedMutators = {},
   			that = {};
+
+		var addMutator = function(name, mutator) {
+			namedMutators[name] = mutator;
+		};
 
 		var addRow = function(data) {
 			var rowData = { data: data };
 			rowDataMutators.forEach(function(mutatorName) {
-				bodyRowDataMutators[mutatorName].mutateRowData(rowData);
+				namedMutators[mutatorName].mutateRowData(rowData);
 			});
 			$dummyParent.append(rowData.$row);
 		};
@@ -230,6 +234,7 @@
 		});
 
   	that.$ele = $bodyDiv;
+  	that.addMutator = addMutator;
   	that.setGridWidth = setGridWidth;
   	that.setHandlers = setHandlers;
   	return that;
@@ -291,10 +296,10 @@
 		headRowDataMutators['defaultFactory'] = createHeadRowFactory($placeholder);
 		headRowDataMutators['addSortData'] = sortExtension;
 
-		bodyRowDataMutators['defaultFactory'] = createBodyRowFactory($placeholder);
-		bodyRowDataMutators['addBodyRowData'] = createBodyRowDataExtension();
+		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
+		body.addMutator('addBodyRowData', createBodyRowDataExtension());
 		if(config.rowDataTransformer) {
-			bodyRowDataMutators['transformer'] = { mutateRowData: config.rowDataTransformer };
+			body.addMutator('transformer', { mutateRowData: config.rowDataTransformer });
 			bodyRowMutators.unshift('transformer');
 		}
 		
