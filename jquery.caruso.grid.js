@@ -137,23 +137,23 @@
 		return that;
 	};
 
-	var createHead = function(rowDataMutators) {
+	var createHead = function(activeDataMutators) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
         clickHandlers = [],
-        namedMutators = {},
+        dataMutators = {},
 				that = {};
 
 		var addHeaderRow = function(data) {
 			var rowData = { data: data };
-			rowDataMutators.forEach(function(mutatorName) {
-				namedMutators[mutatorName].mutateRowData(rowData);
+			activeDataMutators.forEach(function(mutatorName) {
+				dataMutators[mutatorName].mutateRowData(rowData);
 			});
 			$head.empty().append(rowData.$row);
 		};
 
 		var addMutator = function(name, mutator) {
-			namedMutators[name] = mutator;
+			dataMutators[name] = mutator;
 		};
 
 		var setHandlers = function(handlers) {
@@ -175,7 +175,7 @@
 		return that;
 	};
 
-  var createBody = function(rowDataMutators, dataSource, lastColumnWidth) {
+  var createBody = function(activeDataMutators, dataSource, lastColumnWidth) {
   	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
@@ -183,17 +183,17 @@
         clickHandlers = [],
         gridWidth,
         $dummyParent,
-        namedMutators = {},
+        dataMutators = {},
   			that = {};
 
 		var addMutator = function(name, mutator) {
-			namedMutators[name] = mutator;
+			dataMutators[name] = mutator;
 		};
 
 		var addRow = function(data) {
 			var rowData = { data: data };
-			rowDataMutators.forEach(function(mutatorName) {
-				namedMutators[mutatorName].mutateRowData(rowData);
+			activeDataMutators.forEach(function(mutatorName) {
+				dataMutators[mutatorName].mutateRowData(rowData);
 			});
 			$dummyParent.append(rowData.$row);
 		};
