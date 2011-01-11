@@ -113,14 +113,21 @@
 			return body.find(selectedRowSelector);
 		};
 		
-		var handles = function($target) {
+		var canHandle = function($target) {
 			return $target.closest('tr').length === 1;
 		};
 
-		var handle = function($target, evt) {
-			var $clickedRow = $target.closest('tr'),
-					rowIsSelected = $clickedRow.hasClass(selectedRowClassName);
+		var handle = function(carusoEvt) {
+			var $target = carusoEvt.$target,
+					$clickedRow;
+			if(canHandle($target)) {
+				$clickedRow = carusoEvt.$target.closest('tr');
+				toggleSelection($clickedRow);
+			}
+		};
 
+		var toggleSelection = function($clickedRow) {
+			var rowIsSelected = $clickedRow.hasClass(selectedRowClassName);
 			if(rowIsSelected) {
 				$clickedRow.removeClass(selectedRowClassName);
 			} else {
@@ -130,7 +137,6 @@
 
 		that.deselectAll = deselectAll;
 		that.getSelected = getSelected;
-		that.handles = handles;
 		that.handle = handle;
 		that.removeSelected = removeSelected;
 		that.selectAll = selectAll;
@@ -175,16 +181,20 @@
 		return that;
 	};
 
-  var createBody = function(activeDataMutators, dataSource, lastColumnWidth) {
+  var createBody = function(activeClickHandlers, activeDataMutators, dataSource, lastColumnWidth) {
   	var $bodyDiv = $('<div class="caruso-grid-body"><table><tbody></tbody></table></div>').css({ overflow: 'auto' }),
         $bodyTable = $bodyDiv.find('table'),
         $body = $bodyDiv.find('tbody'),
         scrollbarWidth = $.getScrollbarWidth(),
-        clickHandlers = [],
+        clickHandlers = {},
+        dataMutators = {},
         gridWidth,
         $dummyParent,
-        dataMutators = {},
   			that = {};
+
+		var addClickHandler = function(name, handler) {
+			clickHandlers[name] = handler;
+		};
 
 		var addMutator = function(name, mutator) {
 			dataMutators[name] = mutator;
@@ -224,11 +234,16 @@
     };
 
 		$bodyDiv.click(function(evt) {
-      var $target = $(evt.target),
-          matchingHandler = $.filterOne(clickHandlers, function(handler) {
-            return handler.handles($target);
-          });
-      matchingHandler.handle($target, evt);
+      var carusoEvt = {
+						$target: $(evt.target),
+						origianlEvent: evt
+					};
+			
+			activeClickHandlers.forEach(function(handlerName) {
+				clickHandlers[handlerName].handle(carusoEvt);
+			});
+
+			evt.preventDefault();
 		});
 
 		dataSource.onDataReceived(function(data) {
@@ -238,9 +253,9 @@
 		});
 
   	that.$ele = $bodyDiv;
+  	that.addClickHandler = addClickHandler;
   	that.addMutator = addMutator;
   	that.setGridWidth = setGridWidth;
-  	that.setHandlers = setHandlers;
   	return that;
   };
 
@@ -292,14 +307,15 @@
     var $placeholder = $(this[0]),
     		headRowMutators = config.headRowMutators || ['defaultFactory', 'addSortData']
         head = createHead(headRowMutators),
+        bodyClickHandlers = config.bodyClickHandlers || ['rowSelect'],
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
-        body = createBody(bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
-        selectionExtension = createSelectionExtension(body),
+        body = createBody(bodyClickHandlers, bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
         sortExtension = createSortExtension(head, body, config.dataSource);
 
 		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 		head.addMutator('addSortData', sortExtension);
 
+		body.addClickHandler('rowSelect', createSelectionExtension(body));
 		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		body.addMutator('addBodyRowData', createBodyRowDataExtension());
 		if(config.rowDataTransformer) {
@@ -308,7 +324,6 @@
 		}
 		
     head.setHandlers([ sortExtension ]);
-    body.setHandlers([ selectionExtension ]);
 
     return createGrid($placeholder, head, body);
   };
