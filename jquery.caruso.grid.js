@@ -179,8 +179,6 @@
 
 	var createClassNameSelectionHandler = function() {
 		var selectedRowClassName = 'caruso-grid-selected',
-				//note: may not need
-				//selectedRowSelector = 'tr.' + selectedRowClassName,
 				that = {};
 
 		var handleDeselected = function(deselectedEvt) {
