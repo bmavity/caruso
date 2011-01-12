@@ -106,6 +106,7 @@
 
 	<input type="button" id="selectAll" value="Select All" />
 	<input type="button" id="deselectAll" value="Deselect All" />
+	<input type="button" id="removeSelected" value="Remove Selected" />
 	
   <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../lib/jquery.getscrollbarwidth.js"></script>
@@ -187,6 +188,9 @@
     });
     $('#deselectAll').click(function() {
     	g.deselectAll();
+    });
+    $('#removeSelected').click(function() {
+    	g.removeSelected();
     });
   })();
   </script>

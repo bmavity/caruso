@@ -150,7 +150,7 @@
 		};
 
 		var removeSelected = function() {
-			body.find(selectedRowSelector).remove();
+			body.$ele.find(selectedRowSelector).remove();
 		};
 
 		var selectAll = function() {
@@ -404,6 +404,7 @@
 
     grid = createGrid($placeholder, head, body);
     grid.deselectAll = selectionExtension.deselectAll;
+    grid.removeSelected = selectionExtension.removeSelected;
     grid.selectAll = selectionExtension.selectAll;
     return grid;
   };
