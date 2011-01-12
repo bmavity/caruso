@@ -72,22 +72,28 @@
 			return rowData;
     };
 
-    var handles = function($target) {
+    var canHandle = function($target) {
       return $target.closest(thSelector).length !== 0;
     };
 
-    var handle = function($target) {
-      var $clickedHeader = $target.closest(thSelector),
-          sortItem = $clickedHeader.data(sortDataKey);
+    var handle = function(carusoEvt) {
+			var $target = carusoEvt.$target,
+      		$clickedHeader = $target.closest(thSelector);
+					
+			if(canHandle($target)) {
+				$clickedHeader = $target.closest(thSelector),
+				toggleSortOrder($clickedHeader);
+			}
+    };
 
-      if(sortItem) {
-        sortItem.order = sortItem.order === asc ? desc : asc;
-        dataSource.sortData(sortItem);
-      }
+    var toggleSortOrder = function($clickedHeader) {
+			var sortItem = $clickedHeader.data(sortDataKey),
+					sortOrder = sortItem.order === asc ? desc : asc;
+			sortItem.order = sortOrder;
+			dataSource.sortData(sortItem);
     };
 
 		that.handle = handle;
-		that.handles = handles;
 		that.mutateRowData = addSortData;
     return that;
   };
@@ -143,13 +149,17 @@
 		return that;
 	};
 
-	var createHead = function(activeDataMutators) {
+	var createHead = function(activeClickHandlers, activeDataMutators) {
   	var $headerDiv = $('<div class="caruso-grid-head"><table><thead></thead><tbody></tbody></table></div>'),
         $head = $headerDiv.find('thead'),
-        clickHandlers = [],
+        clickHandlers = {},
         dataMutators = {},
 				that = {};
 
+		var addClickHandler = function(name, handler) {
+			clickHandlers[name] = handler;
+		};
+		
 		var addHeaderRow = function(data) {
 			var rowData = { data: data };
 			activeDataMutators.forEach(function(mutatorName) {
@@ -162,22 +172,23 @@
 			dataMutators[name] = mutator;
 		};
 
-		var setHandlers = function(handlers) {
-			clickHandlers = handlers;
-		};
-
     $head.click(function(evt) {
-      var $target = $(evt.target),
-          matchingHandler = $.filterOne(clickHandlers, function(handler) {
-            return handler.handles($target);
-          });
-      matchingHandler.handle($target, evt);
+      var carusoEvt = {
+						$target: $(evt.target),
+						origianlEvent: evt
+					};
+			
+			activeClickHandlers.forEach(function(handlerName) {
+				clickHandlers[handlerName].handle(carusoEvt);
+			});
+
+			evt.preventDefault();
     });
     
     that.$ele = $headerDiv;
+    that.addClickHandler = addClickHandler;
 		that.addHeaderRow = addHeaderRow;
 		that.addMutator = addMutator;
-		that.setHandlers = setHandlers;
 		return that;
 	};
 
@@ -305,13 +316,15 @@
 
   $.fn.carusoGrid = function carusoGrid(config) {
     var $placeholder = $(this[0]),
+    		headClickHandlers = config.headClickHandlers || ['sortData']
     		headRowMutators = config.headRowMutators || ['defaultFactory', 'addSortData']
-        head = createHead(headRowMutators),
+        head = createHead(headClickHandlers, headRowMutators),
         bodyClickHandlers = config.bodyClickHandlers || ['rowSelect'],
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
         body = createBody(bodyClickHandlers, bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
         sortExtension = createSortExtension(head, body, config.dataSource);
 
+		head.addClickHandler('sortData', sortExtension);
 		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 		head.addMutator('addSortData', sortExtension);
 
@@ -322,8 +335,6 @@
 			body.addMutator('transformer', { mutateRowData: config.rowDataTransformer });
 			bodyRowMutators.unshift('transformer');
 		}
-		
-    head.setHandlers([ sortExtension ]);
 
     return createGrid($placeholder, head, body);
   };
