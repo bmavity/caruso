@@ -105,30 +105,34 @@
 				deselectedHandlers = {},
 				that = {};
 
+		var addDeselectedHandler = function(name, handler) {
+			deselectedHandlers[name] = handler;
+		};
+
 		var addSelectedHandler = function(name, handler) {
 			selectedHandlers[name] = handler;
+		};
+
+		var canHandle = function($target) {
+			return $target.closest('tr').length === 1;
 		};
 
 		var deselectAll = function() {
 			body.find(selectedRowSelector).removeClass(selectedRowClassName);
 		};
 
-		var removeSelected = function() {
-			body.find(selectedRowSelector).remove();
+		var deselectRow = function($row) {
+			var deselectData = { $row: $row };
+			$row.removeAttr(selectedRowAttribute);
+			activeDeselectedHandlers.forEach(function(handlerName) {
+				deselectedHandlers[handlerName].handleDeselected(deselectData);
+			});
 		};
 
-		var selectAll = function() {
-			body.find('tr').addClass(selectedRowClassName);
-		};
-		
 		var getSelected = function() {
 			return body.find(selectedRowSelector);
 		};
 		
-		var canHandle = function($target) {
-			return $target.closest('tr').length === 1;
-		};
-
 		var handle = function(carusoEvt) {
 			var $target = carusoEvt.$target,
 					$clickedRow;
@@ -138,9 +142,17 @@
 			}
 		};
 
+		var removeSelected = function() {
+			body.find(selectedRowSelector).remove();
+		};
+
+		var selectAll = function() {
+			body.find('tr').addClass(selectedRowClassName);
+		};
+
 		var selectRow = function($row) {
 			var selectData = { $row: $row };
-			$row.attr(selectedRowAttribute, true);
+			$row.attr(selectedRowAttribute, selectedRowAttribute);
 			activeSelectedHandlers.forEach(function(handlerName) {
 				selectedHandlers[handlerName].handleSelected(selectData);
 			});
@@ -149,13 +161,13 @@
 		var toggleSelection = function($clickedRow) {
 			var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
 			if(rowIsSelected) {
-				//$clickedRow.removeClass(selectedRowClassName);
-				$clickedRow.attr(selectedRowAttribute, false);
+				deselectRow($clickedRow);
 			} else {
 				selectRow($clickedRow);
 			}
 		};
 
+		that.addDeselectedHandler = addDeselectedHandler; 
 		that.addSelectedHandler = addSelectedHandler;
 		that.deselectAll = deselectAll;
 		that.getSelected = getSelected;
@@ -171,11 +183,17 @@
 				//selectedRowSelector = 'tr.' + selectedRowClassName,
 				that = {};
 
+		var handleDeselected = function(deselectedEvt) {
+			var $clickedRow = deselectedEvt.$row;
+			$clickedRow.removeClass(selectedRowClassName);
+		};
+
 		var handleSelected = function(selectedEvt) {
 			var $clickedRow = selectedEvt.$row;
 			$clickedRow.addClass(selectedRowClassName);
 		};
 
+		that.handleDeselected = handleDeselected;
 		that.handleSelected = handleSelected;
 		return that;
 	};
@@ -356,9 +374,11 @@
         sortExtension = createSortExtension(head, body, config.dataSource),
         selectedHandlers = config.selectedHandlers || ['className'],
         deselectedHandlers = config.deselectedHandlers || ['className'],
-				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers);
+				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers),
+				classNameSelectionHandler = createClassNameSelectionHandler();
 
-		selectionExtension.addSelectedHandler('className', createClassNameSelectionHandler());
+		selectionExtension.addSelectedHandler('className', classNameSelectionHandler);
+		selectionExtension.addDeselectedHandler('className', classNameSelectionHandler);
 
 		head.addClickHandler('sortData', sortExtension);
 		head.addMutator('addSortData', sortExtension);
