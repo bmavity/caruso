@@ -98,10 +98,16 @@
     return that;
   };
 
-	var createSelectionExtension = function(body) {
-		var selectedRowClassName = 'caruso-grid-selected',
-				selectedRowSelector = 'tr.' + selectedRowClassName,
+	var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers) {
+		var selectedRowAttribute = 'carusoselected',
+				selectedRowSelector = 'tr[' + selectedRowAttribute + '=true]',
+				selectedHandlers = {},
+				deselectedHandlers = {},
 				that = {};
+
+		var addSelectedHandler = function(name, handler) {
+			selectedHandlers[name] = handler;
+		};
 
 		var deselectAll = function() {
 			body.find(selectedRowSelector).removeClass(selectedRowClassName);
@@ -127,25 +133,50 @@
 			var $target = carusoEvt.$target,
 					$clickedRow;
 			if(canHandle($target)) {
-				$clickedRow = carusoEvt.$target.closest('tr');
+				$clickedRow = $target.closest('tr');
 				toggleSelection($clickedRow);
 			}
 		};
 
+		var selectRow = function($row) {
+			var selectData = { $row: $row };
+			$row.attr(selectedRowAttribute, true);
+			activeSelectedHandlers.forEach(function(handlerName) {
+				selectedHandlers[handlerName].handleSelected(selectData);
+			});
+		};
+
 		var toggleSelection = function($clickedRow) {
-			var rowIsSelected = $clickedRow.hasClass(selectedRowClassName);
+			var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
 			if(rowIsSelected) {
-				$clickedRow.removeClass(selectedRowClassName);
+				//$clickedRow.removeClass(selectedRowClassName);
+				$clickedRow.attr(selectedRowAttribute, false);
 			} else {
-				$clickedRow.addClass(selectedRowClassName);
+				selectRow($clickedRow);
 			}
 		};
 
+		that.addSelectedHandler = addSelectedHandler;
 		that.deselectAll = deselectAll;
 		that.getSelected = getSelected;
 		that.handle = handle;
 		that.removeSelected = removeSelected;
 		that.selectAll = selectAll;
+		return that;
+	};
+
+	var createClassNameSelectionHandler = function() {
+		var selectedRowClassName = 'caruso-grid-selected',
+				//note: may not need
+				//selectedRowSelector = 'tr.' + selectedRowClassName,
+				that = {};
+
+		var handleSelected = function(selectedEvt) {
+			var $clickedRow = selectedEvt.$row;
+			$clickedRow.addClass(selectedRowClassName);
+		};
+
+		that.handleSelected = handleSelected;
 		return that;
 	};
 
@@ -322,13 +353,18 @@
         bodyClickHandlers = config.bodyClickHandlers || ['rowSelect'],
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
         body = createBody(bodyClickHandlers, bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
-        sortExtension = createSortExtension(head, body, config.dataSource);
+        sortExtension = createSortExtension(head, body, config.dataSource),
+        selectedHandlers = config.selectedHandlers || ['className'],
+        deselectedHandlers = config.deselectedHandlers || ['className'],
+				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers);
+
+		selectionExtension.addSelectedHandler('className', createClassNameSelectionHandler());
 
 		head.addClickHandler('sortData', sortExtension);
 		head.addMutator('addSortData', sortExtension);
 		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 
-		body.addClickHandler('rowSelect', createSelectionExtension(body));
+		body.addClickHandler('rowSelect', selectionExtension);
 		body.addMutator('addBodyRowData', createBodyRowDataExtension());
 		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		if(config.rowDataTransformer) {
