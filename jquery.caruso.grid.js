@@ -61,7 +61,7 @@
     return that;
   };
 
-	var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers) {
+	var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers, useMultiSelect) {
 		var selectedRowAttribute = 'carusoselected',
 				selectedRowSelector = 'tr[' + selectedRowAttribute + ']',
 				selectedHandlers = {},
@@ -103,7 +103,27 @@
 					$clickedRow;
 			if(canHandle($target)) {
 				$clickedRow = $target.closest('tr');
-				toggleSelection($clickedRow);
+				if(useMultiSelect) {
+					multiSelect($clickedRow, carusoEvt.originalEvent.metaKey);
+				} else {
+					toggleSelection($clickedRow);
+				}
+			}
+		};
+
+		var multiSelect = function($clickedRow, isMetaKey) {
+			var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
+			if(isMetaKey) {
+				if(rowIsSelected) {
+					deselectRow($clickedRow);
+				} else {
+					selectRow($clickedRow);
+				}
+			} else {
+				if(!rowIsSelected) {
+					deselectAll();
+					selectRow($clickedRow);
+				}
 			}
 		};
 
@@ -261,7 +281,7 @@
 		$bodyDiv.click(function(evt) {
       var carusoEvt = {
 						$target: $(evt.target),
-						origianlEvent: evt
+						originalEvent: evt
 					};
 			
 			activeClickHandlers.forEach(function(handlerName) {
@@ -339,7 +359,7 @@
         sortExtension = createSortExtension(head, body, config.dataSource),
         selectedHandlers = config.selectedHandlers || ['className'],
         deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
-				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers),
+				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers, config.multiSelect),
 				classNameSelectionHandler = createClassNameSelectionHandler(),
 				rowDataExtension = createBodyRowDataExtension(),
 				grid;
@@ -370,17 +390,6 @@
 
 
 /*
-if(config.multiSelect) {
-	if(evt.metaKey) {
-		toggleSelection();
-	} else {
-		if(!rowIsSelected) {
-			deselectAll();
-			selectRow();
-		}
-	}
-}
-
 that.updateRow = function(updateParams) {
 	var $rows = $bodyTable.find('tbody > tr'),
 			rowData;
