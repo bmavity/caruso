@@ -105,7 +105,7 @@
 
 	var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers) {
 		var selectedRowAttribute = 'carusoselected',
-				selectedRowSelector = 'tr[' + selectedRowAttribute + '=true]',
+				selectedRowSelector = 'tr[' + selectedRowAttribute + ']',
 				selectedHandlers = {},
 				deselectedHandlers = {},
 				that = {};
@@ -123,7 +123,9 @@
 		};
 
 		var deselectAll = function() {
-			body.find(selectedRowSelector).removeClass(selectedRowClassName);
+			body.$ele.find(selectedRowSelector).each(function() {
+				deselectRow($(this));
+			});
 		};
 
 		var deselectRow = function($row) {
@@ -401,6 +403,7 @@
 		}
 
     grid = createGrid($placeholder, head, body);
+    grid.deselectAll = selectionExtension.deselectAll;
     grid.selectAll = selectionExtension.selectAll;
     return grid;
   };
