@@ -104,6 +104,7 @@
     </table>
   </div>
 
+	<input type="button" id="selectAll" value="Select All" />
   <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../lib/jquery.getscrollbarwidth.js"></script>
   <script type="text/javascript" src="../../jquery.caruso.text.js"></script>
@@ -178,6 +179,9 @@
           state: 'VT'
         }
       });
+    });
+    $('#selectAll').click(function() {
+    	g.selectAll();
     });
   })();
   </script>

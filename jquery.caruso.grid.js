@@ -152,7 +152,9 @@
 		};
 
 		var selectAll = function() {
-			body.find('tr').addClass(selectedRowClassName);
+			body.$ele.find('tr').each(function() {
+				selectRow($(this));
+			});
 		};
 
 		var selectRow = function($row) {
@@ -368,8 +370,8 @@
 
   $.fn.carusoGrid = function carusoGrid(config) {
     var $placeholder = $(this[0]),
-    		headClickHandlers = config.headClickHandlers || ['sortData']
-    		headRowMutators = config.headRowMutators || ['defaultFactory', 'addSortData']
+    		headClickHandlers = config.headClickHandlers || ['sortData'],
+    		headRowMutators = config.headRowMutators || ['defaultFactory', 'addSortData'],
         head = createHead(headClickHandlers, headRowMutators),
         bodyClickHandlers = config.bodyClickHandlers || ['rowSelect'],
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
@@ -379,7 +381,8 @@
         deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
 				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers),
 				classNameSelectionHandler = createClassNameSelectionHandler(),
-				rowDataExtension = createBodyRowDataExtension();
+				rowDataExtension = createBodyRowDataExtension(),
+				grid;
 
 		selectionExtension.addSelectedHandler('className', classNameSelectionHandler);
 		selectionExtension.addDeselectedHandler('className', classNameSelectionHandler);
@@ -397,7 +400,9 @@
 			bodyRowMutators.unshift('transformer');
 		}
 
-    return createGrid($placeholder, head, body);
+    grid = createGrid($placeholder, head, body);
+    grid.selectAll = selectionExtension.selectAll;
+    return grid;
   };
 })(jQuery);
 
