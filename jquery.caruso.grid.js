@@ -1,46 +1,4 @@
 (function($) {
-  var merge = (function() {
-  	var that = {};
-
-		var mutate = function(mergeInto, mergeFrom) {
-			var key,
-					oldFn;
-			for(key in mergeFrom) {
-				if(mergeFrom.hasOwnProperty(key)) {
-					if(mergeInto.hasOwnProperty(key)) {
-						oldFn = mergeInto[key];
-						mergeInto[key] = function(input) {
-							return mergeFrom[key](oldFn(input));
-						}
-					} else {
-						mergeInto[key] = mergeFrom[key];
-					}
-				}
-			}
-		};
-
-		var transform = function(mergeInto, mergeFrom) {
-			var key,
-					oldFn;
-			for(key in mergeFrom) {
-				if(mergeFrom.hasOwnProperty(key)) {
-					if(mergeInto.hasOwnProperty(key)) {
-						oldFn = mergeInto[key];
-						mergeInto[key] = function(input) {
-							return oldFn(mergeFrom[key](input));
-						};
-					} else {
-						mergeInto[key] = mergeFrom[key];
-					}
-				}
-			}
-		};
-
-		that.mutate = mutate;
-		that.transform = transform;
-  	return that;
-  })();
-
 	var createBodyRowDataExtension = function() {
 		var rowDataKey = 'caruso.grid.rowData',
 				that = {};
@@ -412,10 +370,6 @@
 
 
 /*
-return $.map($selectedRows, function(row) {
-	return $(row).data(rowDataKey);
-});
-
 if(config.multiSelect) {
 	if(evt.metaKey) {
 		toggleSelection();
