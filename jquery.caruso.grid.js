@@ -325,12 +325,12 @@
         sortExtension = createSortExtension(head, body, config.dataSource);
 
 		head.addClickHandler('sortData', sortExtension);
-		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 		head.addMutator('addSortData', sortExtension);
+		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 
 		body.addClickHandler('rowSelect', createSelectionExtension(body));
-		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		body.addMutator('addBodyRowData', createBodyRowDataExtension());
+		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		if(config.rowDataTransformer) {
 			body.addMutator('transformer', { mutateRowData: config.rowDataTransformer });
 			bodyRowMutators.unshift('transformer');
