@@ -45,10 +45,15 @@
 		var rowDataKey = 'caruso.grid.rowData',
 				that = {};
 
+		var handleDeselected = function(deselectedEvt) {
+			deselectedEvt.rowData = deselectedEvt.$row.data(rowDataKey);
+		};
+
 		var mutateRowData = function(rowData) {
 			rowData.$row.data(rowDataKey, rowData);
 		};
 
+		that.handleDeselected = handleDeselected;
 		that.mutateRowData = mutateRowData;
 		return that;
 	};
@@ -371,19 +376,21 @@
         body = createBody(bodyClickHandlers, bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
         sortExtension = createSortExtension(head, body, config.dataSource),
         selectedHandlers = config.selectedHandlers || ['className'],
-        deselectedHandlers = config.deselectedHandlers || ['className'],
+        deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
 				selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers),
-				classNameSelectionHandler = createClassNameSelectionHandler();
+				classNameSelectionHandler = createClassNameSelectionHandler(),
+				rowDataExtension = createBodyRowDataExtension();
 
 		selectionExtension.addSelectedHandler('className', classNameSelectionHandler);
 		selectionExtension.addDeselectedHandler('className', classNameSelectionHandler);
+		selectionExtension.addDeselectedHandler('addRowData', rowDataExtension);
 
 		head.addClickHandler('sortData', sortExtension);
 		head.addMutator('addSortData', sortExtension);
 		head.addMutator('defaultFactory', createHeadRowFactory($placeholder));
 
 		body.addClickHandler('rowSelect', selectionExtension);
-		body.addMutator('addBodyRowData', createBodyRowDataExtension());
+		body.addMutator('addBodyRowData', rowDataExtension);
 		body.addMutator('defaultFactory', createBodyRowFactory($placeholder));
 		if(config.rowDataTransformer) {
 			body.addMutator('transformer', { mutateRowData: config.rowDataTransformer });
@@ -399,17 +406,6 @@
 return $.map($selectedRows, function(row) {
 	return $(row).data(rowDataKey);
 });
-if(config.rowDeselectedHandler) {
-	$selectedRows.each(function() {
-		config.rowDeselectedHandler($(this).data(rowDataKey));
-	});
-}
-if(config.rowDeselectedHandler) {
-	config.rowDeselectedHandler($clickedRow.data(rowDataKey));
-}
-if(config.rowSelectedHandler) {
-	config.rowSelectedHandler($clickedRow.data(rowDataKey));
-}
 
 if(config.multiSelect) {
 	if(evt.metaKey) {
