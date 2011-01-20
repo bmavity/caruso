@@ -4,37 +4,37 @@
   <title>Caruso Grid - Simple Example</title>
 
   <style type="text/css">
-  	td, th {
-  		padding:0;
-  		text-align:left;
-  	}
-  	#customers {
-  		border:solid 1px red;
-  		height:200px;
-  		width:800px;
-  	}
-  		#customers .caruso-grid-selected {
-  			background-color:#F39;
-  		}
+    td, th {
+      padding:0;
+      text-align:left;
+    }
+    #customers {
+      border:solid 1px red;
+      height:200px;
+      width:800px;
+    }
+      #customers .caruso-grid-selected {
+        background-color:#F39;
+      }
 
-			#customers .customer {
-				width:175px;
-			}
-			#customers .city {
-				width:200px;
-			}
-			#customers .company {
-				width:350px;
-			}
-			#customers .state {
-				width:75px;
-			}
+      #customers .customer {
+        width:175px;
+      }
+      #customers .city {
+        width:200px;
+      }
+      #customers .company {
+        width:350px;
+      }
+      #customers .state {
+        width:75px;
+      }
   </style>
 </head>
 <body>
   <h1>Caruso Grid Dynamic Data Loading</h1>
 
-	<div id="customers">
+  <div id="customers">
     <table>
       <thead>
       <tr>
@@ -104,10 +104,12 @@
     </table>
   </div>
 
-	<input type="button" id="selectAll" value="Select All" />
-	<input type="button" id="deselectAll" value="Deselect All" />
-	<input type="button" id="removeSelected" value="Remove Selected" />
-	
+  <input type="button" id="selectAll" value="Select All" />
+  <input type="button" id="deselectAll" value="Deselect All" />
+  <input type="button" id="removeSelected" value="Remove Selected" />
+  <input type="button" id="selectPreviousRow" value="Select Previous" />
+  <input type="button" id="selectNextRow" value="Select Next" />
+  
   <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../lib/jquery.getscrollbarwidth.js"></script>
   <script type="text/javascript" src="../../jquery.caruso.text.js"></script>
@@ -117,7 +119,8 @@
   (function() {
     var ds = (function() {
       var that = {},
-      		dataReceivedCallback,
+          dataReceivedCallback,
+          dataUpdatedCallback,
           items = [
             { firstName: 'Auck', lastName: 'Phillips', company: 'Steal Your Change Subs', city: 'Red Bank', state: 'NJ' },
             { firstName: 'Buck', lastName: 'Phillips', company: 'Hteal Your Change Subs', city: 'Middletown', state: 'NJ' },
@@ -145,28 +148,37 @@
       };
 
       var onDataReceived = function(callback) {
-      	dataReceivedCallback = callback;
+        dataReceivedCallback = callback;
+      };
+      
+      var onDataUpdated = function(callback) {
+        dataUpdatedCallback = callback;
       };
 
-			that.onDataReceived = onDataReceived;
-			that.sortData = sortData;
+      var updateData = function() {
+      };
+
+      that.onDataReceived = onDataReceived;
+      that.onDataUpdated = onDataUpdated;
+      that.sortData = sortData;
+      that.updateData = updateData;
       return that;
     })();
     var g = $('#customers').carusoGrid({
       dataSource: ds,
-      multiSelect: true,
+      multiSelect: false,
       rowDataTransformer: function(rowData) {
-      	var dataItem = rowData.data;
-      	rowData.originalData = dataItem;
+        var dataItem = rowData.data;
+        rowData.originalData = dataItem;
         rowData.data = $.extend(dataItem, {
           customer: dataItem.lastName + ', ' + dataItem.firstName
         });
         return rowData;
       },
-      rowSelectedHandler: function(rowData) {
-        console.log(rowData);
+      selectedHandler: function(rowData) {
+        console.log('selected: ', rowData);
       },
-      rowDeselectedHandler: function(rowData) {
+      deselectedHandler: function(rowData) {
         console.log('deselected: ', rowData);
       }
     });
@@ -184,13 +196,22 @@
       });
     });
     $('#selectAll').click(function() {
-    	g.selectAll();
+      g.selectAll();
     });
     $('#deselectAll').click(function() {
-    	g.deselectAll();
+      g.deselectAll();
     });
     $('#removeSelected').click(function() {
-    	g.removeSelected();
+      g.removeSelected();
+    });
+    $('#updateData').click(function() {
+      ds.updateData();
+    });
+    $('#selectPreviousRow').click(function() {
+      g.selectPreviousRow();
+    });
+    $('#selectNextRow').click(function() {
+      g.selectNextRow();
     });
   })();
   </script>
