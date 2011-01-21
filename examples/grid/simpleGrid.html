@@ -109,6 +109,7 @@
   <input type="button" id="removeSelected" value="Remove Selected" />
   <input type="button" id="selectPreviousRow" value="Select Previous" />
   <input type="button" id="selectNextRow" value="Select Next" />
+  <input type="button" id="updateSelected" value="Update Selected" />
   
   <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
   <script type="text/javascript" src="../../lib/jquery.getscrollbarwidth.js"></script>
@@ -155,7 +156,8 @@
         dataUpdatedCallback = callback;
       };
 
-      var updateData = function() {
+      var updateData = function(updateData) {
+        dataUpdatedCallback(updateData);
       };
 
       that.onDataReceived = onDataReceived;
@@ -183,9 +185,8 @@
       }
     });
     ds.sortData();
-    $('#doIt').click(function() {
-      console.log(g.getSelected());
-      g.updateRow({
+    $('#updateSelected').click(function() {
+      ds.updateData({
         key: {
           name: 'customer',
           val: 'Phillips, Buck'

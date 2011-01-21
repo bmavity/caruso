@@ -1,5 +1,5 @@
 (function($) {
-  var createBodyRowDataExtension = function() {
+  var createBodyRowDataExtension = function(body) {
     var rowDataKey = 'caruso.grid.rowData',
         that = {};
 
@@ -15,6 +15,30 @@
       rowData.$row.data(rowDataKey, rowData);
     };
 
+    var existingRowExtension = (function() {
+      var that = {};
+
+      var addExistingRow = function(rowData) {
+        var $rows = body.$ele.find('tbody > tr'),
+            key = rowData.data.key,
+            data,
+            itemToUpdate;
+        if(key) {
+          rowData.$row = $rows.filterOne(function($row) {
+            data = $row.data(rowDataKey);
+            itemToUpdate = data.originalData || data.data;
+            return itemToUpdate[key.name] === key.val;
+          });
+          rowData.updateData = rowData.data;
+          rowData.data = $.extend(itemToUpdate, rowData.data.data);
+        }
+      };
+
+      that.mutateRowData = addExistingRow;
+      return that;
+    })();
+
+    that.existingRowExtension = existingRowExtension;
     that.handleDeselected = handleDeselected;
     that.handleSelected = handleSelected;
     that.mutateRowData = mutateRowData;
@@ -271,15 +295,19 @@
     };
 
     var addRow = function(data) {
-      var rowData = { data: data };
-      activeDataMutators.forEach(function(mutatorName) {
-        dataMutators[mutatorName].mutateRowData(rowData);
-      });
-      $dummyParent.append(rowData.$row);
+      $dummyParent.append(createRowData(data).$row);
     };
 
     var beginBatch = function() {
       $dummyParent = $('<div />');
+    };
+
+    var createRowData = function(data) {
+      var rowData = { data: data };
+      activeDataMutators.forEach(function(mutatorName) {
+        dataMutators[mutatorName].mutateRowData(rowData);
+      });
+      return rowData;
     };
 
     var endBatch = function() {
@@ -323,14 +351,7 @@
     });
 
     dataSource.onDataUpdated(function(updateParams) {
-      var $rows = $bodyTable.find('tbody > tr'),
-          rowData;
-      var $matchingRow = $rows.filterOne(function($row) {
-        rowData = $row.data(rowDataKey);
-        return rowData[updateParams.key.name] === updateParams.key.val;
-      });
-      $.extend(rowData, updateParams.data);
-      $matchingRow.inject(rowData);
+      createRowData(updateParams);
     });
 
     that.$ele = $bodyDiv;
@@ -376,7 +397,8 @@
     $rowTemplate.children().empty();
 
     var mutateRowData = function(rowData) {
-      rowData.$row = $rowTemplate.clone().inject(rowData.data);
+      rowData.$row = rowData.$row || $rowTemplate.clone();
+      rowData.$row.inject(rowData.data);
     };
 
     that.mutateRowData = mutateRowData;
@@ -396,7 +418,7 @@
         deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
         selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers, config.multiSelect),
         classNameSelectionHandler = createClassNameSelectionHandler(),
-        rowDataExtension = createBodyRowDataExtension(),
+        rowDataExtension = createBodyRowDataExtension(body),
         grid;
 
     selectionExtension.addDeselectedHandler('className', classNameSelectionHandler);
@@ -424,6 +446,9 @@
       selectionExtension.addDeselectedHandler('fromConfig', { handleDeselected: config.deselectedHandler });
       deselectedHandlers.push('fromConfig');
     }
+
+    body.addMutator('existingRow', rowDataExtension.existingRowExtension);
+    bodyRowMutators.unshift('existingRow');
 
     grid = createGrid($placeholder, head, body);
     grid.deselectAll = selectionExtension.deselectAll;
