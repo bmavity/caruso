@@ -6,12 +6,17 @@
     var handleDeselected = function(deselectedEvt) {
       deselectedEvt.rowData = deselectedEvt.$row.data(rowDataKey);
     };
+    
+    var handleSelected = function(selectedEvt) {
+      selectedEvt.rowData = selectedEvt.$row.data(rowDataKey);
+    };
 
     var mutateRowData = function(rowData) {
       rowData.$row.data(rowDataKey, rowData);
     };
 
     that.handleDeselected = handleDeselected;
+    that.handleSelected = handleSelected;
     that.mutateRowData = mutateRowData;
     return that;
   };
@@ -367,12 +372,11 @@
   var createBodyRowFactory = function($placeholder) {
     var $rowTemplate = $placeholder.find('table tbody tr:first-child').clone(),
         that = {};
-      
+    
     $rowTemplate.children().empty();
 
     var mutateRowData = function(rowData) {
       rowData.$row = $rowTemplate.clone().inject(rowData.data);
-      return rowData;
     };
 
     that.mutateRowData = mutateRowData;
@@ -388,16 +392,17 @@
         bodyRowMutators = config.bodyRowMutators || ['defaultFactory', 'addBodyRowData'],
         body = createBody(bodyClickHandlers, bodyRowMutators, config.dataSource, this.find('th:last-child').width()),
         sortExtension = createSortExtension(head, body, config.dataSource),
-        selectedHandlers = config.selectedHandlers || ['className'],
+        selectedHandlers = config.selectedHandlers || ['className', 'addRowData'],
         deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
         selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers, config.multiSelect),
         classNameSelectionHandler = createClassNameSelectionHandler(),
         rowDataExtension = createBodyRowDataExtension(),
         grid;
 
-    selectionExtension.addSelectedHandler('className', classNameSelectionHandler);
     selectionExtension.addDeselectedHandler('className', classNameSelectionHandler);
     selectionExtension.addDeselectedHandler('addRowData', rowDataExtension);
+    selectionExtension.addSelectedHandler('className', classNameSelectionHandler);
+    selectionExtension.addSelectedHandler('addRowData', rowDataExtension);
 
     head.addClickHandler('sortData', sortExtension);
     head.addMutator('addSortData', sortExtension);
