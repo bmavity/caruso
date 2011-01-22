@@ -90,9 +90,10 @@
     return that;
   };
 
-  var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers, useMultiSelect) {
+  var createSelectionExtension = function(body, activeSelectedHandlers, activeDeselectedHandlers, selectionBehavior) {
     var selectedRowAttribute = 'carusoselected',
         selectedRowSelector = 'tr[' + selectedRowAttribute + ']',
+        selectionBehaviors = {},
         selectedHandlers = {},
         deselectedHandlers = {},
         that = {};
@@ -128,20 +129,15 @@
     };
     
     var handle = function(carusoEvt) {
-      var $target = carusoEvt.$target,
-          $clickedRow;
+      var $target = carusoEvt.$target;
       if(canHandle($target)) {
-        $clickedRow = $target.closest('tr');
-        if(useMultiSelect) {
-          multiSelect($clickedRow, carusoEvt.originalEvent.metaKey);
-        } else {
-          toggleSelection($clickedRow);
-        }
+        selectionBehaviors[selectionBehavior]($target.closest('tr'), carusoEvt);
       }
     };
 
-    var multiSelect = function($clickedRow, isMetaKey) {
-      var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
+    var multiSelect = function($clickedRow, carusoEvt) {
+      var rowIsSelected = $clickedRow.attr(selectedRowAttribute),
+          isMetaKey = carusoEvt.originalEvent.metaKey;
       if(isMetaKey) {
         if(rowIsSelected) {
           deselectRow($clickedRow);
@@ -192,7 +188,15 @@
       }
     };
 
-    var toggleSelection = function($clickedRow) {
+    var singleSelect = function($clickedRow) {
+      var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
+      if(!rowIsSelected) {
+        deselectAll();
+        selectRow($clickedRow);
+      }
+    };
+
+    var toggleSelect = function($clickedRow) {
       var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
       if(rowIsSelected) {
         deselectRow($clickedRow);
@@ -200,6 +204,10 @@
         selectRow($clickedRow);
       }
     };
+
+    selectionBehaviors['multi'] = multiSelect;
+    selectionBehaviors['single'] = singleSelect;
+    selectionBehaviors['toggle'] = toggleSelect;
 
     that.addDeselectedHandler = addDeselectedHandler; 
     that.addSelectedHandler = addSelectedHandler;
@@ -416,7 +424,8 @@
         sortExtension = createSortExtension(head, body, config.dataSource),
         selectedHandlers = config.selectedHandlers || ['className', 'addRowData'],
         deselectedHandlers = config.deselectedHandlers || ['className', 'addRowData'],
-        selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers, config.multiSelect),
+        selectionBehavior = config.selectionBehavior || 'single',
+        selectionExtension = createSelectionExtension(body, selectedHandlers, deselectedHandlers, selectionBehavior),
         classNameSelectionHandler = createClassNameSelectionHandler(),
         rowDataExtension = createBodyRowDataExtension(body),
         grid;
