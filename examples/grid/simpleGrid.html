@@ -109,6 +109,7 @@
   <input type="button" id="removeSelected" value="Remove Selected" />
   <input type="button" id="selectPreviousRow" value="Select Previous" />
   <input type="button" id="selectNextRow" value="Select Next" />
+  <input type="button" id="selectRow" value="Select Row" />
   <input type="button" id="updateSelected" value="Update Selected" />
   
   <script type="text/javascript" src="../../lib/jquery-1.4.2.min.js"></script>
@@ -213,6 +214,15 @@
     });
     $('#selectNextRow').click(function() {
       g.selectNextRow();
+    });
+    $('#selectRow').click(function() {
+      g.setSelectedRow(4);
+      setTimeout(function() {
+        g.setSelectedRow({
+          key: {
+            name: 'customer',
+            val: 'Phillips, Buck'
+      }})}, 2000);
     });
   })();
   </script>

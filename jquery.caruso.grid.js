@@ -34,6 +34,20 @@
         }
       };
 
+      var findExistingRow = function(itemOrIndex) {
+        var $rows = body.$ele.find('tbody > tr'),
+            key = itemOrIndex.key;
+        if(key) {
+          return $rows.filterOne(function($row) {
+            var rowData = $row.data(rowDataKey),
+                data = rowData.originalData || rowData.data;
+            return data[key.name] === key.val;
+          });
+        }
+        return itemOrIndex;
+      };
+
+      that.findExistingRow = findExistingRow;
       that.mutateRowData = addExistingRow;
       return that;
     })();
@@ -196,6 +210,17 @@
       }
     };
 
+    var setSelectedRow = function($rowOrIndex) {
+      var isJQuery = $rowOrIndex instanceof jQuery,
+          $row;
+      if(isJQuery) {
+        $row = $rowOrIndex;
+      } else {
+        $row = body.$ele.find('tr:eq(' + $rowOrIndex + ')');
+      }
+      selectionBehaviors[selectionBehavior]($row);
+    };
+
     var toggleSelect = function($clickedRow) {
       var rowIsSelected = $clickedRow.attr(selectedRowAttribute);
       if(rowIsSelected) {
@@ -218,6 +243,7 @@
     that.selectAll = selectAll;
     that.selectNextRow = selectNextRow;
     that.selectPreviousRow = selectPreviousRow;
+    that.setSelectedRow = setSelectedRow;
     return that;
   };
 
@@ -465,6 +491,9 @@
     grid.selectAll = selectionExtension.selectAll;
     grid.selectNextRow = selectionExtension.selectNextRow;
     grid.selectPreviousRow = selectionExtension.selectPreviousRow;
+    grid.setSelectedRow = function(itemOrIndex) {
+      selectionExtension.setSelectedRow(rowDataExtension.existingRowExtension.findExistingRow(itemOrIndex));
+    };
     return grid;
   };
 })(jQuery);
