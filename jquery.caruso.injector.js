@@ -26,7 +26,8 @@
 (function($) {
   var valHandler = {
         handles: function($element) {
-          return true;
+          if($element.is('input')) return true;
+          return $element.is('textarea');
         },
         getValue: function($element) {
           return $element.val();
@@ -48,14 +49,14 @@
       },
       htmlSetter = {
         handles: function($element) {
-          return $element.is('td');
+          return true;
         },
         setValue: function($element, val) {
           $element.html(val);
         }
       },
       getters = [checkboxGroupHandler, valHandler],
-      setters = [htmlSetter, valHandler];
+      setters = [valHandler, htmlSetter];
 
   var findElements = function($element, propertyName) {
     var selectors = [
