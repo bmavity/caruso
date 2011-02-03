@@ -93,11 +93,10 @@
   $.fn.inject = function(obj) {
     var propertyName,
         foundElements,
-        setter,
-        $ele = this.clone();
+        setter;
 
     Object.keys(obj).forEach(function(propertyName) {
-      foundElements = findElements($ele, propertyName);
+      foundElements = findElements(this, propertyName);
       if(foundElements) {
         setter = $.filterOne(setters, function(setterObj) {
           return setterObj.handles(foundElements);
@@ -106,7 +105,7 @@
       }
     });
 
-    return $ele;
+    return this;
   };
 
 })(jQuery);
