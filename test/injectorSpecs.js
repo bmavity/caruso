@@ -4,7 +4,7 @@ var vows = require('vows'),
 vows.describe('injector').addBatch({
   'when initiated': {
     topic: function() {
-      return require('../lib/injector');
+      return require('caruso').injector;
     },
 
     'should not bomb': function(injector) {
