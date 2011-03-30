@@ -70,5 +70,34 @@ suite.addBatch({
   }
 });
 
+suite.addBatch({
+  'when injecting an object': {
+    topic: function() {
+      var inj = require('caruso').injector;
+      inj.env('<div class="message"></div><div id="content"><p class="message"></p></div>', this.callback);
+    },
+
+    'an object': {
+      topic: function(env) {
+        env.inject({
+          content: {
+            message: 'only inside content'
+          }
+        });
+        console.log(env.render());
+        return env;
+      },
+
+      'should not contain the content in the unnested match': function(env) {
+        assert.ok(env.render().indexOf('<div class="message"></div>') !== -1);
+      },
+
+      'should contain the content in the nested match': function(env) {
+        assert.ok(env.render().indexOf('<div id="content"><p class="message">only inside content</p></div>') !== -1);
+      }
+    }
+  }
+});
+
 
 suite.run();
