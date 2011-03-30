@@ -35,7 +35,7 @@ suite.addBatch({
       inj.env('<div></div>', this.callback);
     },
 
-    'should have the environment': function(err, env) {
+    'should contain the content': function(err, env) {
       env.inject({ div: 'hi there' });
       assert.ok(env.render().indexOf('<div>hi there</div>') !== -1);
     }
