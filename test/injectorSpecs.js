@@ -43,6 +43,20 @@ suite.addBatch({
 });
 
 suite.addBatch({
+  'when injecting id content': {
+    topic: function() {
+      var inj = require('caruso').injector;
+      inj.env('<h1 id="name"></h1>', this.callback);
+    },
+
+    'should contain the content': function(err, env) {
+      env.inject({ name: 'Rumpletumskin' });
+      assert.ok(env.render().indexOf('<h1 id="name">Rumpletumskin</h1>') !== -1);
+    }
+  }
+});
+
+suite.addBatch({
   'when injecting class name content': {
     topic: function() {
       var inj = require('caruso').injector;
