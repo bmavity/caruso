@@ -42,5 +42,19 @@ suite.addBatch({
   }
 });
 
+suite.addBatch({
+  'when injecting class name content': {
+    topic: function() {
+      var inj = require('caruso').injector;
+      inj.env('<div class="message"></div>', this.callback);
+    },
+
+    'should contain the content': function(err, env) {
+      env.inject({ message: 'class me' });
+      assert.ok(env.render().indexOf('<div class="message">class me</div>') !== -1);
+    }
+  }
+});
+
 
 suite.run();
