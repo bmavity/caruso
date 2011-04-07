@@ -57,6 +57,20 @@ suite.addBatch({
 });
 
 suite.addBatch({
+  'when injecting attribute content': {
+    topic: function() {
+      var inj = require('caruso').injector;
+      inj.env('<div id="yo"></div>', this.callback);
+    },
+
+    'should contain the content': function(err, env) {
+      env.inject({ div: { id: 'attributeMe' } });
+      assert.ok(env.render().indexOf('<div id="attributeMe"></div>') !== -1);
+    }
+  }
+});
+
+suite.addBatch({
   'when injecting class name content': {
     topic: function() {
       var inj = require('caruso').injector;
