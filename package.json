@@ -1,3 +1,25 @@
 {
-  "main": "./lib/caruso.js"
+  "author": "Brian Mavity <brian@brianmavity.com> (http://www.brianmavity.com)",
+  "contributors": [
+    "Brian Mavity <brian@brianmavity.com> (http://www.brianmavity.com)"
+  ],
+  "description": "Make you server and client act the same",
+  "dependencies": {
+    "jsdom": "0.2.0",
+    "vows": "0.5.8"
+  },
+  "engines": {
+    "node": "0.4.7"
+  },
+  "keywords": [
+    "templating"
+  ],
+  "main": "./lib/caruso.js",
+  "name": "caruso",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bmavity/caruso.git"
+  },
+  "version": "0.0.1"
 }
+
