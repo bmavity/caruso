@@ -3,13 +3,12 @@
   "contributors": [
     "Brian Mavity <brian@brianmavity.com> (http://www.brianmavity.com)"
   ],
-  "description": "Make you server and client act the same",
+  "description": "Unobtrusive templating and dom manipulations",
   "dependencies": {
-    "jsdom": "0.2.0",
-    "vows": "0.5.8"
+    "jsdom": "0.2.0"
   },
   "engines": {
-    "node": "0.4.7"
+    "node": "~0.4.7"
   },
   "keywords": [
     "templating"
