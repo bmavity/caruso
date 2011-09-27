@@ -129,6 +129,32 @@
           };
 
           var dataSource = function(source) {
+            source.on('initial data', function(data, key) {
+              var $children = $ele.children()
+                , matchedData = []
+                , unmatchedData = []
+                ;
+              if($children.length) {
+                if(data.hasOwnProperty('length')) {
+                  var keyedData = {};
+                  data.forEach(function(dataItem) {
+                    keyedData[dataItem[key]] = dataItem;
+                  });
+                  $children.each(function() {
+                    var $child = $(this)
+                      , $match = $child.find('[name=' + key + ']')
+                      , matchVal = $match.val()
+                      , matchingData = matchVal && keyedData[matchVal]
+                      ;
+                    if($match.length && matchingData) {
+                      $child.data('caruso.data', matchingData);
+                    }
+                  });
+                }
+              } else {
+                inject(data);
+              }
+            });
             source.on('data', function(data) {
               inject(data);
             });
