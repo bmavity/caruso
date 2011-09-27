@@ -1,4 +1,5 @@
 ;(function() {
+  var noop = function() {};
   var oi = (function() {
     var forIn = function(obj, callback) {
       getKeys(obj).forEach(function(key) {
@@ -43,11 +44,6 @@
     var registrations = {}
       ;
 
-    var register = function(evt, name, fn) {
-      registrations[evt] = registrations[evt] || {};
-      registrations[evt][name] = fn;
-    };
-
     var hitIt = function(evt, data, end) {
       var args = Array.prototype.slice(arguments, 0)
         , it = oi.iter(registrations[evt])
@@ -60,15 +56,19 @@
             it.next(executeHandler);
           };
         } else {
-          nextFn = function() {
-            end && end();
-          }
+          nextFn = noop;
         }
         val.apply(null, [data, nextFn]);
       };
       if(it.hasNext()) {
         it.next(executeHandler);
       }
+      end && end();
+    };
+
+    var register = function(evt, name, fn) {
+      registrations[evt] = registrations[evt] || {};
+      registrations[evt][name] = fn;
     };
 
     this.hitIt = hitIt;
@@ -97,19 +97,45 @@
 
         var bindElement = function($ele) {
           var $template = locateTemplate($ele);
-          var inject = function(data) {
-            var injectArgs = {
+
+          var createInjectArgs = function(data) {
+            return {
               $template: $template.clone()
             , data: data
-            }
-            ;
+            };
+          };
+          
+          var injectSingle = function($appendToEle, data) {
+            var injectArgs = createInjectArgs(data);
             exports.hitIt('inject', injectArgs, function() {
-              $ele.append(injectArgs.$template);
+              $appendToEle.append(injectArgs.$template);
+            });
+          };
+          
+          var injectArray = function($appendToEle, data) {
+            var $parent = $('<div></div>');
+            data.forEach(function(dataItem) {
+              injectSingle($parent, dataItem);
+            });
+            $appendToEle.append($parent.children());
+          };
+          
+          var inject = function(data) {
+            if(data.hasOwnProperty('length')) {
+              injectArray($ele, data);
+            } else {
+              injectSingle($ele, data);
+            }
+          };
+
+          var dataSource = function(source) {
+            source.on('data', function(data) {
+              inject(data);
             });
           };
 
           return {
-            inject: inject
+            dataSource: dataSource
           };
         };
 
