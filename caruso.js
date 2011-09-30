@@ -1,202 +1,239 @@
-;(function() {
-  var noop = function() {};
-  var oi = (function() {
-    var forIn = function(obj, callback) {
-      getKeys(obj).forEach(function(key) {
-        callback(key, obj[key]);
-      });
-    };
-
-    var getKeys = function(obj) {
-      return Object.keys(obj);
-    };
-
-    var iter = function(obj) {
-      var keys = getKeys(obj)
-        , i = 0
-        ;
-
-      var hasNext = function() {
-        return !!keys[i];
+;(function(module) {
+  (function(exports, define) {
+    define('util', function() {
+      var isArray = function(x) {
+        return Object.prototype.toString.call(x) === "[object Array]";
       };
 
-      var next = function(callback) {
-        var key = keys[i]
-          , val = obj[key]
-          ;
-        i++;
-        callback(key, val);
+      var isFunction  = function(x) {
+        return Object.prototype.toString.call(x) === "[object Function]";
       };
 
-      return {
-        hasNext: hasNext
-      , next: next
+      var isNumber  = function(x) {
+        return Object.prototype.toString.call(x) === "[object Number]";
       };
-    };
 
-    return {
-      forIn: forIn
-    , iter: iter
-    };
-  })();
-
-  function Registrar() {
-    var registrations = {}
-      ;
-
-    var hitIt = function(evt, data, end) {
-      var args = Array.prototype.slice(arguments, 0)
-        , it = oi.iter(registrations[evt])
-        ;
-      var executeHandler = function(key, val) {
-        var nextFn
-          ;
-        if(it.hasNext()) {
-          nextFn = function() {
-            it.next(executeHandler);
-          };
-        } else {
-          nextFn = noop;
-        }
-        val.apply(null, [data, nextFn]);
+      var isString  = function(x) {
+        return Object.prototype.toString.call(x) === "[object String]";
       };
-      if(it.hasNext()) {
-        it.next(executeHandler);
-      }
-      end && end();
-    };
 
-    var register = function(evt, name, fn) {
-      registrations[evt] = registrations[evt] || {};
-      registrations[evt][name] = fn;
-    };
-
-    this.hitIt = hitIt;
-    this.register = register;
-  };
-
-  var setValue = function($match, val) {
-    if($match.is('input')) {
-      $match.val(val);
-    } else {
-      $match.text(val);
+      exports.isArray = isArray;
+      exports.isFunction = isFunction;
+      exports.isNumber = isNumber;
+      exports.isString = isString;
+    });
+  })(typeof exports !== 'undefined' ? exports : module.exports
+  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
+      factoryFn();
+      window[name] = module.exports;
     }
-  };
+  );
+})(typeof module !== 'undefined' ? module : { exports: {} });
 
+;(function(module) {
+  (function(exports, define) {
+    define('oi', function() {
+      var forIn = function(obj, callback) {
+        getKeys(obj).forEach(function(key) {
+          callback(key, obj[key]);
+        });
+      };
 
-  (function(module) {
-    (function(exports, define) {
-      define('caruso', function() {
-        module.exports = exports = new Registrar();
+      var getKeys = function(obj) {
+        return Object.keys(obj);
+      };
 
-        var locateTemplate = function($ele) {
-          var $template = $ele.find('script[type*=template]');
-          $template.remove();
-          return $($template.html());
+      var iter = function(obj) {
+        var keys = getKeys(obj)
+          , i = 0
+          ;
+
+        var hasNext = function() {
+          return !!keys[i];
         };
 
-        var bindElement = function($ele) {
-          var $template = locateTemplate($ele);
+        var next = function(callback) {
+          var key = keys[i]
+            , val = obj[key]
+            ;
+          i++;
+          callback(key, val);
+        };
 
-          var createInjectArgs = function(data) {
-            return {
-              $template: $template.clone()
-            , data: data
-            };
-          };
-          
-          var injectSingle = function($appendToEle, data) {
-            var injectArgs = createInjectArgs(data);
-            exports.hitIt('inject', injectArgs, function() {
-              $appendToEle.append(injectArgs.$template);
-            });
-          };
-          
-          var injectArray = function($appendToEle, data) {
-            var $parent = $('<div></div>');
-            data.forEach(function(dataItem) {
-              injectSingle($parent, dataItem);
-            });
-            $appendToEle.append($parent.children());
-          };
-          
-          var inject = function(data) {
-            if(data.hasOwnProperty('length')) {
-              injectArray($ele, data);
+        return {
+          hasNext: hasNext
+        , next: next
+        };
+      };
+
+      exports.forIn = forIn;
+      exports.iter = iter;
+    });
+  })(typeof exports !== 'undefined' ? exports : module.exports
+  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
+      factoryFn();
+      window[name] = module.exports;
+    }
+  );
+})(typeof module !== 'undefined' ? module : { exports: {} });
+
+;(function(module) {
+  (function(exports, define) {
+    define('chains', function() {
+      function FunctionChainer() {
+        var registrations = {}
+          , noop = function() {}
+          ;
+
+        var executeChain = function(evt, data, end) {
+          var args = Array.prototype.slice.call(arguments, 1)
+            , lastEle = args.slice(-1)[0]
+            , it = oi.iter(registrations[evt])
+            ;
+
+          if(util.isFunction(lastEle)) {
+            end = args.pop();
+          }
+
+          var executeHandler = function(key, val) {
+            var nextFn
+              ;
+            if(it.hasNext()) {
+              nextFn = function() {
+                it.next(executeHandler);
+              };
             } else {
-              injectSingle($ele, data);
+              nextFn = noop;
             }
+            val.apply(null, args.concat([nextFn]));
           };
+          if(it.hasNext()) {
+            it.next(executeHandler);
+          }
+          end && end();
+        };
 
-          var dataSource = function(source) {
-            source.on('initial data', function(data, key) {
-              var $children = $ele.children()
-                , matchedData = []
-                , unmatchedData = []
-                ;
-              if($children.length) {
-                if(data.hasOwnProperty('length')) {
-                  var keyedData = {};
-                  data.forEach(function(dataItem) {
-                    keyedData[dataItem[key]] = dataItem;
-                  });
-                  $children.each(function() {
-                    var $child = $(this)
-                      , $match = $child.find('[name=' + key + ']')
-                      , matchVal = $match.val()
-                      , matchingData = matchVal && keyedData[matchVal]
-                      ;
-                    if($match.length && matchingData) {
-                      $child.data('caruso.data', matchingData);
-                    }
-                  });
-                }
+        var addToChain = function(evt, name, fn) {
+          registrations[evt] = registrations[evt] || {};
+          registrations[evt][name] = fn;
+        };
+
+        this.addToChain = addToChain;
+        this.executeChain = executeChain;
+      };
+
+      exports.FunctionChainer = FunctionChainer;
+    });
+  })(typeof exports !== 'undefined' ? exports : module.exports
+  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
+      factoryFn();
+      window[name] = module.exports;
+    }
+  );
+})(typeof module !== 'undefined' ? module : { exports: {} });
+
+;(function(module) {
+  (function(exports, define) {
+    define('caruso', function(util, oi, chain) {
+      var chainer = new chain.FunctionChainer();
+      module.exports = exports = chainer;
+
+      var bindElement = function($ele) {
+        var templateArgs;
+
+        var appendArray = function($appendToEle, arr) {
+          var $parent = $('<div></div>');
+          injectArray($parent, arr);
+          $appendToEle.append($parent.children());
+        };
+
+        var appendSingle = function($appendToEle, obj) {
+          var $templateInstance = templateArgs.$template.clone()
+            , bindingDataArgs = {
+              $ele: $templateInstance
+            , data: obj
+            }
+            ;
+          chainer.executeChain('binding data', bindingDataArgs, function() {
+            injectSingle($templateInstance, obj);
+            $appendToEle.append($templateInstance);
+          });
+        };
+
+        var inject = function(data) {
+          if(util.isArray(data)) {
+            appendArray($ele, data);
+          } else {
+            appendSingle($ele, data);
+          }
+        };
+
+        var injectArray = function($injectIntoEle, arr) {
+          arr.forEach(function(item) {
+            appendSingle($injectIntoEle, item);
+          });
+        };
+
+        var injectSingle = function($injectIntoEle, obj) {
+          var locationArgs
+            , locationResult
+            ;
+          oi.forIn(obj, function(key, val) {
+            locationArgs = {
+              key: key
+            , $template: $injectIntoEle
+            };
+            locationResult = {};
+            chainer.executeChain('matching element', locationArgs, locationResult, function() {
+              var $match = locationResult.$match;
+              if(util.isString(val) || util.isNumber(val)) {
+                chainer.executeChain('setting value', {
+                  $match: $match
+                , val: val
+                });
               } else {
-                inject(data);
+                if(util.isArray(val)) {
+                  injectArray($match, val);
+                } else {
+                  injectSingle($match, val);
+                }
               }
             });
+          });
+        };
+
+        var dataSource = function(source) {
+          if(util.isString(source)) {
+            $.get(source, function(res) {
+              inject(data);
+            });
+          } else {
             source.on('data', function(data) {
               inject(data);
             });
-          };
-
-          return {
-            dataSource: dataSource
-          };
+          }
         };
 
-        var selectorInjector = function(selectorFactory) {
-          return function(injectArgs, next) {
-            var $ele = injectArgs.$template
-              , data = injectArgs.data
-              ;
-              oi.forIn(data, function(key, val) {
-                var $match = $ele.find(selectorFactory(key));
-                if($match.length !== 0) {
-                  setValue($match, val);
-                }
-              });
-            next();
-          };
+        setTimeout(function() {
+          var templateIn = { $ele: $ele }
+            , templateOut = {}
+            ;
+          chainer.executeChain('locating template', templateIn, templateOut, function() {
+            templateArgs = templateOut;
+          });
+        }, 50);
+
+        return {
+          dataSource: dataSource
         };
+      };
 
-        exports.bindElement = bindElement;
-        exports.selectorInjector = selectorInjector;
-
-
-        var caruso = exports;
-        caruso.register('inject', 'class', caruso.selectorInjector(function(key) {
-          return '.' + key;
-        }));
-        caruso.register('inject', 'name', caruso.selectorInjector(function(key) {
-          return '[name=' + key + ']';
-        }));
-      });
-    })(typeof exports !== 'undefined' ? exports : module.exports
-    , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-        factoryFn();
-        window[name] = module.exports;
-      }
-    );
-  })(typeof module !== 'undefined' ? module : { exports: {} });
-})();
+      exports.bindElement = bindElement;
+    });
+  })(typeof exports !== 'undefined' ? exports : module.exports
+  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
+      factoryFn(window.util, window.oi, window.chains);
+      window[name] = module.exports;
+    }
+  );
+})(typeof module !== 'undefined' ? module : { exports: {} });
