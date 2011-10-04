@@ -115,6 +115,10 @@
             , it = oi.iter(registrations[evt] || {})
             ;
 
+          var executeChild = function() {
+            child.executeChain.apply(child, args);
+          };
+
           var executeHandler = function(key, val) {
             var nextFn
               ;
@@ -123,9 +127,7 @@
                 it.next(executeHandler);
               };
             } else if(child) {
-              nextFn = function() {
-                child.executeChain.apply(child, args);
-              };
+              nextFn = executeChild;
             } else {
               nextFn = noop;
             }
@@ -133,6 +135,8 @@
           };
           if(it.hasNext()) {
             it.next(executeHandler);
+          } else if(child) {
+            executeChild();
           }
           end && end();
         };
