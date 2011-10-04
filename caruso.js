@@ -77,7 +77,7 @@
         var dataSource = function(source) {
           if(util.isString(source)) {
             http.get(source, function(res) {
-              inject(data);
+              inject(res);
             });
           } else {
             source.on('data', function(data) {
