@@ -103,17 +103,17 @@
       function FunctionChainer() {
         var registrations = {}
           , noop = function() {}
+          , child
           ;
 
         var executeChain = function(evt, data, end) {
-          var args = Array.prototype.slice.call(arguments, 1)
-            , lastEle = args.slice(-1)[0]
+          var args = Array.prototype.slice.call(arguments, 0)
+            , data = args.concat([])
+            , evt = data.shift()
+            , lastArg = data.slice(-1)[0]
+            , end = util.isFunction(lastArg) ? data.pop() : null
             , it = oi.iter(registrations[evt] || {})
             ;
-
-          if(util.isFunction(lastEle)) {
-            end = args.pop();
-          }
 
           var executeHandler = function(key, val) {
             var nextFn
@@ -122,10 +122,14 @@
               nextFn = function() {
                 it.next(executeHandler);
               };
+            } else if(child) {
+              nextFn = function() {
+                child.executeChain.apply(child, args);
+              };
             } else {
               nextFn = noop;
             }
-            val.apply(null, args.concat([nextFn]));
+            val.apply(null, data.concat([nextFn]));
           };
           if(it.hasNext()) {
             it.next(executeHandler);
@@ -138,6 +142,11 @@
           registrations[evt][name] = fn;
         };
 
+        var addChild = function(childChain) {
+          child = childChain;
+        };
+
+        this.addChild = addChild;
         this.addToChain = addToChain;
         this.executeChain = executeChain;
       };

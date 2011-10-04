@@ -1,11 +1,14 @@
 ;(function(module) {
   (function(exports, define) {
     define('caruso', function(util, oi, chain, http) {
-      var chainer = new chain.FunctionChainer();
-      module.exports = exports = chainer;
+      var globalChainer = new chain.FunctionChainer();
+      module.exports = exports = globalChainer;
 
       var bindElement = function($ele) {
-        var templateArgs;
+        var localChainer = new chain.FunctionChainer()
+          , templateArgs
+          , that = localChainer
+          ;
 
         var appendArray = function($appendToEle, arr) {
           var $parent = $('<div></div>');
@@ -20,7 +23,7 @@
             , data: obj
             }
             ;
-          chainer.executeChain('binding data', bindingDataArgs, function() {
+          that.executeChain('binding data', bindingDataArgs, function() {
             injectSingle($templateInstance, obj);
             $appendToEle.append($templateInstance);
           });
@@ -50,12 +53,13 @@
             , $template: $injectIntoEle
             };
             locationResult = {};
-            chainer.executeChain('matching element', locationArgs, locationResult, function() {
+            that.executeChain('matching element', locationArgs, locationResult, function() {
               var $match = locationResult.$match;
               if($match) {
                 if(util.isString(val) || util.isNumber(val)) {
-                  chainer.executeChain('setting value', {
-                    $match: $match
+                  that.executeChain('setting value', {
+                    key: key
+                  , $match: $match
                   , val: val
                   });
                 } else {
@@ -86,14 +90,14 @@
           var templateIn = { $ele: $ele }
             , templateOut = {}
             ;
-          chainer.executeChain('locating template', templateIn, templateOut, function() {
+          globalChainer.executeChain('locating template', templateIn, templateOut, function() {
             templateArgs = templateOut;
           });
         }, 50);
 
-        return {
-          dataSource: dataSource
-        };
+        that.addChild(globalChainer);
+        that.dataSource = dataSource;
+        return that;
       };
 
       exports.bindElement = bindElement;
