@@ -51,7 +51,12 @@
         }
       });
 
-      caruso.addToChain('binding data', 'caruso.data', function(input, next) {
+      caruso.addToChain('binding data', 'caruso.data.bind', function(input, next) {
+        input.$ele.data('caruso.data', input.data);
+        next();
+      });
+
+      caruso.addToChain('removing data', 'caruso.data.remove', function(input, next) {
         input.$ele.data('caruso.data', input.data);
         next();
       });

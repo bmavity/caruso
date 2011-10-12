@@ -80,8 +80,14 @@
               inject(res);
             });
           } else {
+            source.on('init', function() {
+              $ele.empty();
+            });
             source.on('data', function(data) {
               inject(data);
+            });
+            source.on('remove', function(data) {
+              that.executeChain('removing data', { data: data });
             });
           }
         };
