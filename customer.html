@@ -1,0 +1,49 @@
+var applicationId = candidate.ApplicationId;
+			   var statusColor = candidate.HasCurrentStep && candidate.CurrentStepIsComplete ? "green" : candidate.IsNew ? "red" : "";
+<li class="collapsable button closed inactive candidateDisplay @(candidate.HasCurrentStep ? candidate.CurrentStepName.Replace(" ", "").ToLower() : "")">
+  <input type="hidden" name="ApplicationId" value="@applicationId">
+<div class="collapseButton"></div>
+  <div class="btn contentArea white">
+      <span class="inner">
+          <div class="jobnotes full">
+              <div class="status"><span class="innerbg @statusColor"></span></div>
+              <div class="flag1"><span class="innerbg"></span></div>
+              <div class="flag2"><span class="innerbg"></span></div>
+              <div class="flag3"><span class="innerbg"></span></div>
+              <div class="rating"><div class="innerbg">@candidate.Rating</div></div>
+              <a href="#resume" class="candidate slideBtn">@candidate.FullName</a>
+              <div class="interviewScore">8.2</div>
+              <div class="note">What a great team player</div>
+              <div class="received">@candidate.ReceivedOnDate.ToString("MM.dd.yyyy")</div>
+          </div>
+          <a href="@(Url.Action<ApplicationsController>(x => x.Resume(candidate.ApplicationId)))" class="gotobtn slideBtn resumeLink"></a>
+      </span>
+
+      <div class="contentAreaContent">
+          <div class="candidateInfo">
+              @candidate.Address1<br />
+              @if(!String.IsNullOrWhiteSpace(candidate.Address2)) { @candidate.Address2<br /> }
+@candidate.CityStateZip<br />
+              <a href="#">@(candidate.DistanceInMilesFromJob.HasValue ? "{0} miles".ToFormat(candidate.DistanceInMilesFromJob.Value) : "n/a")</a>
+              <br /><br />
+              @candidate.Phone1<br />
+              @if(!String.IsNullOrWhiteSpace(candidate.Phone2)) { @candidate.Phone2<br /> }
+              <br />
+              <a href="mailto:@(candidate.EmailAddress)">@candidate.EmailAddress</a>
+              <br /><br />
+              <img src="/Content/shortlist/images/m-icon.png" />
+          </div>
+
+          <div class="jobControls">
+              <a href="#" class="phonescreen jobControl">Phone screen</a>
+              <a href="#" class="move jobControl confirm">Move to interview step</a>
+              <a href="#otherJobs" class="switch jobControl confirm flip" rel="3">Consider for another job</a>
+<form action="@(Url.Action<ApplicationsController>(x => x.Reactivate(applicationId)))" method="POST">
+<a href="#" class="activate jobControl submit" rel="reactivate">Re-activate candidate</a>
+</form>
+          </div>
+
+          <div class="contentAreaContentBottom"></div>
+      </div>
+  </div>
+</li>

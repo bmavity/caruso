@@ -19,9 +19,9 @@
         var appendSingle = function($appendToEle, obj) {
           var $templateInstance = templateArgs.$template.clone()
             , bindingDataArgs = {
-              $ele: $templateInstance
-            , data: obj
-            }
+                $ele: $templateInstance
+              , data: obj
+              }
             ;
           that.executeChain('binding data', bindingDataArgs, function() {
             injectSingle($templateInstance, obj);
@@ -79,7 +79,7 @@
             http.get(source, function(res) {
               inject(res);
             });
-          } else {
+          } else if(source.on) {
             source.on('init', function() {
               $ele.empty();
             });
@@ -89,6 +89,8 @@
             source.on('remove', function(data) {
               that.executeChain('removing data', { data: data });
             });
+          } else {
+            injectSingle($ele, source);
           }
         };
 
@@ -108,10 +110,11 @@
 
       exports.bindElement = bindElement;
     });
-  })(typeof exports !== 'undefined' ? exports : module.exports
-  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-      factoryFn(window.util, window.oi, window.chains, window.http);
-      window[name] = module.exports;
-    }
-  );
-})(typeof module !== 'undefined' ? module : { exports: {} });
+  })(module.exports, module.define);
+})(typeof module !== 'undefined' ?
+    module :
+    ((window.operatic && operatic.Module) ?
+      new operatic.Module() :
+      (function() { throw 'If an AMD system is not available, operatic module shim must be included'; })()
+    )
+);

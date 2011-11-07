@@ -22,13 +22,14 @@
       exports.isNumber = isNumber;
       exports.isString = isString;
     });
-  })(typeof exports !== 'undefined' ? exports : module.exports
-  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-      factoryFn();
-      window[name] = module.exports;
-    }
-  );
-})(typeof module !== 'undefined' ? module : { exports: {} });
+  })(module.exports, module.define);
+})(typeof module !== 'undefined' ?
+    module :
+    ((window.operatic && operatic.Module) ?
+      new operatic.Module() :
+      (function() { throw 'If an AMD system is not available, operatic module shim must be included'; })()
+    )
+);
 
 ;(function(module) {
   (function(exports, define) {
@@ -70,13 +71,14 @@
       exports.forIn = forIn;
       exports.iter = iter;
     });
-  })(typeof exports !== 'undefined' ? exports : module.exports
-  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-      factoryFn();
-      window[name] = module.exports;
-    }
-  );
-})(typeof module !== 'undefined' ? module : { exports: {} });
+  })(module.exports, module.define);
+})(typeof module !== 'undefined' ?
+    module :
+    ((window.operatic && operatic.Module) ?
+      new operatic.Module() :
+      (function() { throw 'If an AMD system is not available, operatic module shim must be included'; })()
+    )
+);
 
 ;(function(module) {
   (function(exports, define) {
@@ -89,17 +91,18 @@
 
       exports.merge = merge;
     });
-  })(typeof exports !== 'undefined' ? exports : module.exports
-  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-      factoryFn(window.oi);
-      window[name] = module.exports;
-    }
-  );
-})(typeof module !== 'undefined' ? module : { exports: {} });
+  })(module.exports, module.define);
+})(typeof module !== 'undefined' ?
+    module :
+    ((window.operatic && operatic.Module) ?
+      new operatic.Module() :
+      (function() { throw 'If an AMD system is not available, operatic module shim must be included'; })()
+    )
+);
 
 ;(function(module) {
   (function(exports, define) {
-    define('chains', function() {
+    define('chain', function() {
       function FunctionChainer() {
         var registrations = {}
           , noop = function() {}
@@ -157,10 +160,11 @@
 
       exports.FunctionChainer = FunctionChainer;
     });
-  })(typeof exports !== 'undefined' ? exports : module.exports
-  , typeof define !== 'undefined' ? define : function(name, factoryFn) {
-      factoryFn();
-      window[name] = module.exports;
-    }
-  );
-})(typeof module !== 'undefined' ? module : { exports: {} });
+  })(module.exports, module.define);
+})(typeof module !== 'undefined' ?
+    module :
+    ((window.operatic && operatic.Module) ?
+      new operatic.Module() :
+      (function() { throw 'If an AMD system is not available, operatic module shim must be included'; })()
+    )
+);
