@@ -6,6 +6,7 @@
   "description": "Unobtrusive templating and dom manipulations",
   "dependencies": {
     "jsdom": "0.2.0"
+  , "operatic": "0.0.1"
   },
   "engines": {
     "node": "~0.4.7"
@@ -13,12 +14,12 @@
   "keywords": [
     "templating"
   ],
-  "main": "./lib/caruso.js",
+  "main": "./lib/index.js",
   "name": "caruso",
   "repository": {
     "type": "git",
     "url": "git://github.com/bmavity/caruso.git"
   },
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
 
