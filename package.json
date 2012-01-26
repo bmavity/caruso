@@ -8,7 +8,7 @@
     "connect": "1.6.0"
   , "eventemitter2": "0.4.1"
   , "jsdom": "0.2.0"
-  , "operatic": "0.1.0"
+  , "operatic": "0.1.2"
   },
   "engines": {
     "node": ">=0.6.0"
