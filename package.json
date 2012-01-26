@@ -11,7 +11,7 @@
   , "operatic": "0.1.0"
   },
   "engines": {
-    "node": "~0.4.7"
+    "node": ">=0.6.0"
   },
   "keywords": [
     "templating"
@@ -22,6 +22,6 @@
     "type": "git",
     "url": "git://github.com/bmavity/caruso.git"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
 
