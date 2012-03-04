@@ -1,5 +1,11 @@
 ;(function(module) { var exports = module.exports, define = module.define;
   define('oi', function() {
+    var forEach = function(obj, callback) {
+      getKeys(obj).forEach(function(key) {
+        callback(obj[key], key);
+      });
+    };
+
     var forIn = function(obj, callback) {
       getKeys(obj).forEach(function(key) {
         callback(key, obj[key]);
@@ -33,7 +39,7 @@
       };
     };
 
-    exports.forEach = forIn;
+    exports.forEach = forEach;
     exports.forIn = forIn;
     exports.iter = iter;
   });
